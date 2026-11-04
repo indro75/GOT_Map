@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#050508">
 <title>Game of Thrones — Realms of Westeros</title>
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
 </head>
 <body class="landing">
 
-  <!-- Dynamic Ember Particles -->
   <canvas id="emberCanvas"></canvas>
   <div class="film-grain"></div>
 
@@ -20,52 +20,53 @@
       <span class="sigil">🐉</span>
     </div>
     
-    <h1 class="title-main">GAME OF THRONES</h1>
+    <h1 class="title-main">GAME OF<br>THRONES</h1>
     <h2 class="title-sub">The Realms of Westeros</h2>
     <p class="motto">"When you play the game of thrones, you win or you die."</p>
 
     <a href="map.html" class="enter-btn">
       <span class="btn-text">Enter the Realm</span>
-      <div class="sword-divider">
-        <span></span>
-      </div>
+      <div class="sword-divider"><span>⚔</span></div>
     </a>
 
+    <div class="houses-label">Explore the Great Houses</div>
     <div class="houses-strip">
-      <span class="house-btn" data-house="stark">STARK</span><span>·</span>
-      <span class="house-btn" data-house="lannister">LANNISTER</span><span>·</span>
-      <span class="house-btn" data-house="targaryen">TARGARYEN</span><span>·</span>
-      <span class="house-btn" data-house="baratheon">BARATHEON</span><span>·</span>
-      <span class="house-btn" data-house="tyrell">TYRELL</span><span>·</span>
-      <span class="house-btn" data-house="martell">MARTELL</span><span>·</span>
-      <span class="house-btn" data-house="greyjoy">GREYJOY</span><span>·</span>
-      <span class="house-btn" data-house="arryn">ARRYN</span><span>·</span>
-      <span class="house-btn" data-house="tully">TULLY</span>
+      <button class="house-btn" data-house="stark">Stark</button>
+      <button class="house-btn" data-house="lannister">Lannister</button>
+      <button class="house-btn" data-house="targaryen">Targaryen</button>
+      <button class="house-btn" data-house="baratheon">Baratheon</button>
+      <button class="house-btn" data-house="tyrell">Tyrell</button>
+      <button class="house-btn" data-house="martell">Martell</button>
+      <button class="house-btn" data-house="greyjoy">Greyjoy</button>
+      <button class="house-btn" data-house="arryn">Arryn</button>
+      <button class="house-btn" data-house="tully">Tully</button>
     </div>
   </div>
 
   <!-- House Modal -->
-  <div id="houseModal" class="house-modal hidden">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeHouseModal()">✕</button>
-      <div class="modal-header">
-        <div class="modal-sigil" id="modalSigil">🐺</div>
-        <h2 class="modal-title" id="modalHouseName">House Stark</h2>
-        <p class="modal-words" id="modalWords">"Winter is Coming"</p>
-      </div>
-      <div class="modal-body">
-        <div class="modal-section">
-          <h3>📜 History</h3>
-          <p id="modalHistory">Content here...</p>
+  <div id="houseModal" class="house-modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      <button class="modal-close" onclick="closeHouseModal()" aria-label="Close">✕</button>
+      <div class="modal-scroll">
+        <div class="modal-header">
+          <div class="modal-sigil" id="modalSigil">🐺</div>
+          <h2 class="modal-title" id="modalHouseName">House Stark</h2>
+          <p class="modal-words" id="modalWords">"Winter is Coming"</p>
         </div>
-        <div class="modal-section">
-          <h3>🏰 Seat & Region</h3>
-          <p id="modalSeat">Content here...</p>
-        </div>
-        <div class="modal-section">
-          <h3>⚔ Main Characters</h3>
-          <div class="characters-grid" id="modalCharacters">
-            <!-- Characters injected here -->
+        <div class="modal-body">
+          <div class="modal-section">
+            <h3>📜 History</h3>
+            <p id="modalHistory"></p>
+          </div>
+          <div class="modal-section">
+            <h3>🏰 Seat & Region</h3>
+            <p id="modalSeat"></p>
+          </div>
+          <div class="modal-section">
+            <h3>⚔ Main Characters</h3>
+            <div class="characters-grid" id="modalCharacters"></div>
           </div>
         </div>
       </div>
