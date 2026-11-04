@@ -27,15 +27,48 @@
     <a href="map.html" class="enter-btn">
       <span class="btn-text">Enter the Realm</span>
       <div class="sword-divider">
-        <span>⚔</span>
+        <span></span>
       </div>
     </a>
 
     <div class="houses-strip">
-      <span>STARK</span><span>·</span><span>LANNISTER</span><span>·</span>
-      <span>TARGARYEN</span><span>·</span><span>BARATHEON</span><span>·</span>
-      <span>TYRELL</span><span>·</span><span>MARTELL</span><span>·</span>
-      <span>GREYJOY</span><span>·</span><span>ARRYN</span><span>·</span><span>TULLY</span>
+      <span class="house-btn" data-house="stark">STARK</span><span>·</span>
+      <span class="house-btn" data-house="lannister">LANNISTER</span><span>·</span>
+      <span class="house-btn" data-house="targaryen">TARGARYEN</span><span>·</span>
+      <span class="house-btn" data-house="baratheon">BARATHEON</span><span>·</span>
+      <span class="house-btn" data-house="tyrell">TYRELL</span><span>·</span>
+      <span class="house-btn" data-house="martell">MARTELL</span><span>·</span>
+      <span class="house-btn" data-house="greyjoy">GREYJOY</span><span>·</span>
+      <span class="house-btn" data-house="arryn">ARRYN</span><span>·</span>
+      <span class="house-btn" data-house="tully">TULLY</span>
+    </div>
+  </div>
+
+  <!-- House Modal -->
+  <div id="houseModal" class="house-modal hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeHouseModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-sigil" id="modalSigil">🐺</div>
+        <h2 class="modal-title" id="modalHouseName">House Stark</h2>
+        <p class="modal-words" id="modalWords">"Winter is Coming"</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <h3>📜 History</h3>
+          <p id="modalHistory">Content here...</p>
+        </div>
+        <div class="modal-section">
+          <h3>🏰 Seat & Region</h3>
+          <p id="modalSeat">Content here...</p>
+        </div>
+        <div class="modal-section">
+          <h3>⚔ Main Characters</h3>
+          <div class="characters-grid" id="modalCharacters">
+            <!-- Characters injected here -->
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
