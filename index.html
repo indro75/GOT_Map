@@ -2,297 +2,42 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Realms of Westeros — Interactive Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game of Thrones — Realms of Westeros</title>
 <link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
 </head>
-<body class="main-page">
+<body class="landing">
 
-  <audio id="themeAudio" loop>
-    <source src="theme.mp3" type="audio/mpeg">
-  </audio>
+  <!-- Dynamic Ember Particles -->
+  <canvas id="emberCanvas"></canvas>
+  <div class="film-grain"></div>
 
-  <header class="top-bar">
-    <div class="brand">⚔ REALMS OF WESTEROS</div>
-    <nav>
-      <button data-section="map" class="nav-btn active">The Map</button>
-      <button data-section="kingdoms" class="nav-btn">Kingdoms</button>
-      <button data-section="wall" class="nav-btn">The Wall</button>
-      <button id="muteBtn" class="nav-btn">🔊</button>
-    </nav>
-  </header>
-
-  <!-- MAP SECTION -->
-  <section id="map" class="section active">
-    <h2 class="section-title">The Known World</h2>
-    <p class="section-sub">Click any region to learn its history and ruler.</p>
-
-    <div class="map-container">
-      <svg viewBox="0 0 800 1000" class="westeros-map">
-        <!-- Background sea -->
-        <rect width="800" height="1000" fill="#0a0a0a"/>
-
-        <!-- Sunset Sea label -->
-        <text x="40" y="500" fill="#3a3a3a" font-family="Cinzel" font-size="14" transform="rotate(-90 40 500)">SUNSET SEA</text>
-        <text x="720" y="500" fill="#3a3a3a" font-family="Cinzel" font-size="14" transform="rotate(90 720 500)">THE SHIVERING SEA</text>
-
-        <!-- BEYOND THE WALL -->
-        <path class="region" data-kingdom="beyond"
-              d="M 150,40 L 650,40 L 660,140 L 140,140 Z"
-              fill="#2a2a2a" stroke="#555" stroke-width="1"/>
-        <text x="400" y="95" text-anchor="middle" fill="#888" font-family="Cinzel" font-size="16" font-style="italic">BEYOND THE WALL</text>
-
-        <!-- THE WALL -->
-        <rect class="region wall-marker" data-kingdom="wall"
-              x="140" y="140" width="520" height="18"
-              fill="#b8c5d1" stroke="#fff" stroke-width="2"/>
-        <text x="400" y="153" text-anchor="middle" fill="#000" font-family="Cinzel" font-size="11" font-weight="bold">THE WALL</text>
-
-        <!-- THE NORTH -->
-        <path class="region" data-kingdom="north"
-              d="M 140,158 L 660,158 L 650,320 L 150,320 Z"
-              fill="#3d4a3a" stroke="#6a7a5a" stroke-width="1.5"/>
-        <text x="400" y="245" text-anchor="middle" fill="#c8d4b8" font-family="Cinzel" font-size="20" font-weight="bold">THE NORTH</text>
-        <text x="400" y="270" text-anchor="middle" fill="#8a9a7a" font-family="MedievalSharp" font-size="12">Winterfell</text>
-
-        <!-- IRON ISLANDS -->
-        <path class="region" data-kingdom="iron"
-              d="M 90,380 L 130,370 L 135,450 L 95,460 Z"
-              fill="#3a3a4a" stroke="#6a6a8a" stroke-width="1.5"/>
-        <text x="112" y="420" text-anchor="middle" fill="#aab" font-family="Cinzel" font-size="9">IRON</text>
-        <text x="112" y="432" text-anchor="middle" fill="#aab" font-family="Cinzel" font-size="9">ISLANDS</text>
-
-        <!-- THE VALE -->
-        <path class="region" data-kingdom="vale"
-              d="M 550,320 L 660,320 L 670,430 L 560,440 Z"
-              fill="#4a5a6a" stroke="#7a8a9a" stroke-width="1.5"/>
-        <text x="610" y="380" text-anchor="middle" fill="#c8d4e0" font-family="Cinzel" font-size="18" font-weight="bold">THE VALE</text>
-        <text x="610" y="400" text-anchor="middle" fill="#8a9aaa" font-family="MedievalSharp" font-size="11">The Eyrie</text>
-
-        <!-- THE RIVERLANDS -->
-        <path class="region" data-kingdom="river"
-              d="M 280,320 L 550,320 L 560,440 L 420,480 L 290,450 Z"
-              fill="#4a3a2a" stroke="#7a6a5a" stroke-width="1.5"/>
-        <text x="420" y="390" text-anchor="middle" fill="#d4c4a8" font-family="Cinzel" font-size="18" font-weight="bold">RIVERLANDS</text>
-        <text x="420" y="410" text-anchor="middle" fill="#9a8a6a" font-family="MedievalSharp" font-size="11">Riverrun</text>
-
-        <!-- THE WESTERLANDS -->
-        <path class="region" data-kingdom="west"
-              d="M 150,320 L 280,320 L 290,450 L 260,530 L 140,510 Z"
-              fill="#6a5a2a" stroke="#a08a4a" stroke-width="1.5"/>
-        <text x="210" y="420" text-anchor="middle" fill="#f0d890" font-family="Cinzel" font-size="16" font-weight="bold">WESTER-</text>
-        <text x="210" y="440" text-anchor="middle" fill="#f0d890" font-family="Cinzel" font-size="16" font-weight="bold">LANDS</text>
-        <text x="210" y="460" text-anchor="middle" fill="#b09a5a" font-family="MedievalSharp" font-size="11">Casterly Rock</text>
-
-        <!-- THE CROWNLANDS -->
-        <path class="region" data-kingdom="crown"
-              d="M 560,440 L 670,430 L 680,560 L 570,580 L 480,540 Z"
-              fill="#5a4a2a" stroke="#a08a4a" stroke-width="1.5"/>
-        <text x="600" y="500" text-anchor="middle" fill="#f0d890" font-family="Cinzel" font-size="16" font-weight="bold">CROWN-</text>
-        <text x="600" y="520" text-anchor="middle" fill="#f0d890" font-family="Cinzel" font-size="16" font-weight="bold">LANDS</text>
-        <text x="600" y="540" text-anchor="middle" fill="#b09a5a" font-family="MedievalSharp" font-size="11">King's Landing</text>
-
-        <!-- THE REACH -->
-        <path class="region" data-kingdom="reach"
-              d="M 260,530 L 480,540 L 500,720 L 240,720 Z"
-              fill="#4a5a3a" stroke="#7a9a5a" stroke-width="1.5"/>
-        <text x="370" y="630" text-anchor="middle" fill="#c8e4a8" font-family="Cinzel" font-size="20" font-weight="bold">THE REACH</text>
-        <text x="370" y="655" text-anchor="middle" fill="#8aaa6a" font-family="MedievalSharp" font-size="12">Highgarden</text>
-
-        <!-- THE STORMLANDS -->
-        <path class="region" data-kingdom="storm"
-              d="M 500,580 L 680,560 L 690,740 L 540,750 Z"
-              fill="#3a4a5a" stroke="#6a8aaa" stroke-width="1.5"/>
-        <text x="590" y="660" text-anchor="middle" fill="#c8d4e8" font-family="Cinzel" font-size="18" font-weight="bold">STORM-</text>
-        <text x="590" y="680" text-anchor="middle" fill="#c8d4e8" font-family="Cinzel" font-size="18" font-weight="bold">LANDS</text>
-        <text x="590" y="700" text-anchor="middle" fill="#8aaacc" font-family="MedievalSharp" font-size="11">Storm's End</text>
-
-        <!-- DORNE -->
-        <path class="region" data-kingdom="dorne"
-              d="M 240,720 L 540,750 L 560,920 L 220,920 Z"
-              fill="#6a4a2a" stroke="#c08a4a" stroke-width="1.5"/>
-        <text x="390" y="830" text-anchor="middle" fill="#f0c888" font-family="Cinzel" font-size="22" font-weight="bold">DORNE</text>
-        <text x="390" y="855" text-anchor="middle" fill="#c09a5a" font-family="MedievalSharp" font-size="12">Sunspear</text>
-
-        <!-- Compass rose -->
-        <g transform="translate(720,900)">
-          <circle r="35" fill="none" stroke="#6a5a2a" stroke-width="1"/>
-          <text y="-40" text-anchor="middle" fill="#c0a060" font-family="Cinzel" font-size="14">N</text>
-          <text y="52" text-anchor="middle" fill="#c0a060" font-family="Cinzel" font-size="14">S</text>
-          <text x="-45" y="5" text-anchor="middle" fill="#c0a060" font-family="Cinzel" font-size="14">W</text>
-          <text x="45" y="5" text-anchor="middle" fill="#c0a060" font-family="Cinzel" font-size="14">E</text>
-          <path d="M 0,-25 L 5,0 L 0,25 L -5,0 Z" fill="#c0a060"/>
-        </g>
-
-        <!-- Title -->
-        <text x="400" y="980" text-anchor="middle" fill="#8a6a3a" font-family="Cinzel" font-size="14" font-style="italic">~ A Song of Ice and Fire ~</text>
-      </svg>
+  <div class="landing-content">
+    <div class="sigil-container">
+      <div class="sigil-ring"></div>
+      <div class="sigil-ring delay"></div>
+      <span class="sigil">🐉</span>
     </div>
-  </section>
+    
+    <h1 class="title-main">GAME OF THRONES</h1>
+    <h2 class="title-sub">The Realms of Westeros</h2>
+    <p class="motto">"When you play the game of thrones, you win or you die."</p>
 
-  <!-- KINGDOMS SECTION -->
-  <section id="kingdoms" class="section">
-    <h2 class="section-title">The Seven Kingdoms</h2>
-    <p class="section-sub">The great houses and their domains.</p>
-
-    <div class="kingdoms-grid">
-      <div class="kingdom-card" data-kingdom="north">
-        <div class="card-sigil">🐺</div>
-        <h3>The North</h3>
-        <p class="house">House Stark</p>
-        <p class="seat">Seat: Winterfell</p>
-        <p class="words">"Winter is Coming"</p>
-        <p class="desc">The largest of the Seven Kingdoms, a harsh land of snow-capped mountains and ancient forests. Ruled for millennia by the Kings of Winter, the Starks are an honorable house descended from the First Men. Currently ruled by <strong>King Bran the Broken</strong>, the Three-Eyed Raven.</p>
+    <a href="map.html" class="enter-btn">
+      <span class="btn-text">Enter the Realm</span>
+      <div class="sword-divider">
+        <span>⚔</span>
       </div>
+    </a>
 
-      <div class="kingdom-card" data-kingdom="vale">
-        <div class="card-sigil">🦅</div>
-        <h3>The Vale of Arryn</h3>
-        <p class="house">House Arryn</p>
-        <p class="seat">Seat: The Eyrie</p>
-        <p class="words">"As High as Honor"</p>
-        <p class="desc">A mountainous kingdom protected by the Giant's Lance and the impregnable castle of the Eyrie. Never conquered by dragon or army. Ruled by <strong>Lord Robin Arryn</strong>, the young Lord of the Eyrie and Warden of the East, with his mother Lady Sansa Stark serving as his protector.</p>
-      </div>
-
-      <div class="kingdom-card" data-kingdom="river">
-        <div class="card-sigil">🐟</div>
-        <h3>The Riverlands</h3>
-        <p class="house">House Tully</p>
-        <p class="seat">Seat: Riverrun</p>
-        <p class="words">"Family, Duty, Honor"</p>
-        <p class="desc">A fertile land of rivers and streams, but with no natural borders — making it the battlefield of every war. Once ruled by House Hoare, then the Tullys rose with Aegon's Conquest. Currently ruled by <strong>Lord Edmure Tully</strong>, Lord of Riverrun and Lord Paramount of the Trident.</p>
-      </div>
-
-      <div class="kingdom-card" data-kingdom="iron">
-        <div class="card-sigil">🦑</div>
-        <h3>The Iron Islands</h3>
-        <p class="house">House Greyjoy</p>
-        <p class="seat">Seat: Pyke</p>
-        <p class="words">"We Do Not Sow"</p>
-        <p class="desc">A harsh archipelago of raiders and reavers who worship the Drowned God. Their longships once terrorized the western coast. Ruled by <strong>Queen Yara Greyjoy</strong>, the first woman to claim the Seastone Chair, who bent the knee to the Iron Throne.</p>
-      </div>
-
-      <div class="kingdom-card" data-kingdom="west">
-        <div class="card-sigil">🦁</div>
-        <h3>The Westerlands</h3>
-        <p class="house">House Lannister</p>
-        <p class="seat">Seat: Casterly Rock</p>
-        <p class="words">"Hear Me Roar!" (Unofficial: "A Lannister Always Pays His Debts")</p>
-        <p class="desc">A wealthy land of gold mines and rolling hills, home to the richest house in Westeros. Casterly Rock overlooks the Sunset Sea. After the deaths of Tywin, Cersei, and Jaime, the Westerlands are ruled by <strong>Lord Tyrion Lannister</strong>, Hand of the King.</p>
-      </div>
-
-      <div class="kingdom-card" data-kingdom="crown">
-        <div class="card-sigil">👑</div>
-        <h3>The Crownlands</h3>
-        <p class="house">House Baratheon (of King's Landing)</p>
-        <p class="seat">Seat: King's Landing / Red Keep</p>
-        <p class="words">"Ours is the Fury"</p>
-        <p class="desc">The lands surrounding the capital, ruled directly from the Iron Throne. Home to the Red Keep, the Dragonpit, and the bustling city of King's Landing. Now ruled by <strong>King Bran the Broken</strong> of House Stark, the first elected king of the Six Kingdoms.</p>
-      </div>
-
-      <div class="kingdom-card" data-kingdom="reach">
-        <div class="card-sigil">🌹</div>
-        <h3>The Reach</h3>
-        <p class="house">House Tyrell (formerly)</p>
-        <p class="seat">Seat: Highgarden</p>
-        <p class="words">"Growing Strong"</p>
-        <p class="desc">The most fertile and populous kingdom, a land of chivalry, flowers, and vineyards. After the extinction of the main Tyrell line, Highgarden's rule is uncertain, with the throne granting it to <strong>Lord Gendly Baratheon</strong> (Gendry, Robert's bastard, legitimized).</p>
-      </div>
-
-      <div class="kingdom-card" data-kingdom="storm">
-        <div class="card-sigil">🦌</div>
-        <h3>The Stormlands</h3>
-        <p class="house">House Baratheon</p>
-        <p class="seat">Seat: Storm's End</p>
-        <p class="words">"Ours is the Fury"</p>
-        <p class="desc">A land of fierce storms, rugged coastlines, and proud warriors. Once ruled by the Storm Kings before Aegon's Conquest. Now ruled by <strong>Lord Gendry Baratheon</strong>, legitimized bastard of the late King Robert Baratheon, Lord of Storm's End.</p>
-      </div>
-
-      <div class="kingdom-card" data-kingdom="dorne">
-        <div class="card-sigil">☀</div>
-        <h3>Dorne</h3>
-        <p class="house">House Martell</p>
-        <p class="seat">Seat: Sunspear</p>
-        <p class="words">"Unbowed, Unbent, Unbroken"</p>
-        <p class="desc">The southernmost kingdom, a land of deserts, mountains, and passionate people. Unique among the kingdoms for resisting the Targaryens and joining by marriage. The Martells ruled as Princes. After the deaths of Doran, Trystane, and Ellaria's line, rule passes to an unknown Martell heir.</p>
-      </div>
-
-      <div class="kingdom-card" data-kingdom="beyond">
-        <div class="card-sigil">❄</div>
-        <h3>Beyond the Wall</h3>
-        <p class="house">Free Folk / Wildlings</p>
-        <p class="seat">No fixed seat</p>
-        <p class="words">"The North Remembers"</p>
-        <p class="desc">The frozen lands north of the Wall, home to the Free Folk — people who refuse to kneel to any king. Once united by King-Beyond-the-Wall Mance Rayder. After the Great War, many wildlings settled in the Gift under <strong>Tormund Giantsbane</strong>, while others remain in the true north.</p>
-      </div>
+    <div class="houses-strip">
+      <span>STARK</span><span>·</span><span>LANNISTER</span><span>·</span>
+      <span>TARGARYEN</span><span>·</span><span>BARATHEON</span><span>·</span>
+      <span>TYRELL</span><span>·</span><span>MARTELL</span><span>·</span>
+      <span>GREYJOY</span><span>·</span><span>ARRYN</span><span>·</span><span>TULLY</span>
     </div>
-  </section>
-
-  <!-- THE WALL SECTION -->
-  <section id="wall" class="section">
-    <h2 class="section-title">The Wall</h2>
-    <p class="section-sub">"Night gathers, and now my watch begins."</p>
-
-    <div class="wall-hero">
-      <div class="wall-visual">
-        <div class="ice-block"></div>
-        <div class="ice-block"></div>
-        <div class="ice-block"></div>
-        <div class="ice-block"></div>
-        <div class="ice-block"></div>
-      </div>
-      <div class="wall-stats">
-        <div class="stat"><span>300</span> miles long</div>
-        <div class="stat"><span>700</span> feet tall</div>
-        <div class="stat"><span>8,000</span> years old</div>
-        <div class="stat"><span>19</span> original castles</div>
-      </div>
-    </div>
-
-    <div class="wall-content">
-      <div class="wall-chapter">
-        <h3>⚔ The Origin</h3>
-        <p>The Wall was raised roughly <strong>8,000 years ago</strong> at the end of the Long Night, a winter that lasted a generation and brought the White Walkers (the Others) from the far north. According to legend, it was built by <strong>Bran the Builder</strong>, founder of House Stark, with the aid of giants and possibly the children of the forest. The Wall is not mere ice — it is infused with ancient magic that prevents the Others and their wights from passing.</p>
-      </div>
-
-      <div class="wall-chapter">
-        <h3>🏰 The Night's Watch</h3>
-        <p>The Wall is garrisoned by the <strong>Night's Watch</strong>, a sworn brotherhood founded at the same time. The Watch takes an oath: <em>"I shall live and die at my post... I am the sword in the darkness... the shield that guards the realms of men."</em> They wear only black, take no titles, hold no lands, and father no children. Once numbering in the thousands, by the time of the Great War the Watch had dwindled to fewer than a hundred men.</p>
-      </div>
-
-      <div class="wall-chapter">
-        <h3>🗡 The Castles</h3>
-        <p>Nineteen castles were originally built along the Wall. By the era of the War of the Five Kings, only three remained manned:</p>
-        <ul>
-          <li><strong>Castle Black</strong> — the headquarters, located at the midpoint, where the gate tunnels lead south.</li>
-          <li><strong>Eastwatch-by-the-Sea</strong> — the easternmost active castle, guarding the shore.</li>
-          <li><strong>Shadow Tower</strong> — the westernmost active castle, deep in the western mountains.</li>
-        </ul>
-        <p>Other famous ruined castles include the <strong>Nightfort</strong> (the oldest and most haunted), <strong>Greyguard</strong>, and <strong>Westwatch-by-the-Bridge</strong>.</p>
-      </div>
-
-      <div class="wall-chapter">
-        <h3>🐉 The Great War</h3>
-        <p>In the final war against the dead, the Night King breached the Wall at <strong>Eastwatch</strong> using the resurrected dragon Viserion. The Wall fell. The dead marched south. But at Winterfell, Arya Stark slew the Night King, shattering the army of the dead. After the war, <strong>Jon Snow</strong> — once Lord Commander of the Watch — was exiled back to the Wall. He led the remaining wildlings beyond it, free at last.</p>
-      </div>
-
-      <div class="wall-chapter">
-        <h3>🌲 The Wall Today</h3>
-        <p>With the White Walkers destroyed, the Wall's purpose has changed. Jon Snow leads the Free Folk back into the true north to rebuild. The Night's Watch, under a new Lord Commander, stands as guardians not against the dead — but as a symbol that the realms of men will remember the long night, and stand ready should it ever return.</p>
-        <p class="oath">"I am the watcher on the walls. I am the fire that burns against the cold, the light that brings the dawn, the horn that wakes the sleepers, the shield that guards the realms of men."</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- INFO PANEL (appears when clicking map) -->
-  <div id="infoPanel" class="info-panel hidden">
-    <button class="close-btn" onclick="closePanel()">✕</button>
-    <div id="panelContent"></div>
   </div>
-
-  <footer>
-    <p>⚔ Forged in the fires of Westeros · A fan tribute to George R.R. Martin's A Song of Ice and Fire ⚔</p>
-  </footer>
 
   <script src="script.js"></script>
 </body>
