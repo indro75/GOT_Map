@@ -1,78 +1,3716 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<meta name="theme-color" content="#050508">
-<title>Game of Thrones — Realms of Westeros</title>
-<link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Game of Thrones-Map</title>
+  
+  <!-- Medieval Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;700;800&family=MedievalSharp&family=Alegreya:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       RESET & BASE STYLES
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    :root {
+      --parchment-base: #eadeb8;
+      --parchment-dark: #b89f6e;
+      --parchment-light: #f7f1dd;
+      --parchment-deep: #443423;
+      --ink-dark: #1f160e;
+      --ink-medium: #3c2d1b;
+      --ink-faint: #695237;
+      --gold-accent: #c69b3e;
+      --gold-bright: #e5b95a;
+      --iron-dark: #272c30;
+      --ruby-dark: #6e1616;
+      --sea-color: #d6caa8;
+      --sea-deep: #c4b693;
+      --wood-frame: #2c1a0e;
+      --border-ornate: #8c6e3d;
+      --shadow-heavy: rgba(14, 9, 5, 0.6);
+      --font-display: 'Cinzel Decorative', 'Cinzel', serif;
+      --font-heading: 'Cinzel', serif;
+      --font-body: 'Alegreya', Georgia, serif;
+      --font-lore: 'MedievalSharp', cursive, serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--wood-frame);
+      color: var(--ink-dark);
+      font-family: var(--font-body);
+      font-size: 15px;
+    }
+
+    /* ==========================================================================
+       CONTAINER & FRAME
+       ========================================================================== */
+    #app-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #eedfb8 20%, #cfba8b 60%, #997e50 100%);
+    }
+
+    /* Weathered Map Border */
+    .map-frame-border {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      box-shadow: inset 0 0 60px 20px rgba(25, 15, 6, 0.7),
+                  inset 0 0 15px 5px rgba(0, 0, 0, 0.85);
+      border: 8px solid #2f1d0c;
+      border-image: linear-gradient(to bottom, #47301c, #1f1207, #47301c) 1;
+    }
+
+    .corner-ornament {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      z-index: 101;
+      pointer-events: none;
+      opacity: 0.85;
+      fill: var(--gold-accent);
+      filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.7));
+    }
+    .corner-tl { top: 6px; left: 6px; }
+    .corner-tr { top: 6px; right: 6px; transform: scaleX(-1); }
+    .corner-bl { bottom: 6px; left: 6px; transform: scaleY(-1); }
+    .corner-br { bottom: 6px; right: 6px; transform: scale(-1, -1); }
+
+    /* ==========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================== */
+    #top-bar {
+      position: relative;
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(28, 18, 9, 0.94) 0%, rgba(46, 30, 16, 0.88) 100%);
+      border-bottom: 2px solid var(--border-ornate);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .brand-crest {
+      width: 32px;
+      height: 32px;
+      fill: var(--gold-bright);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      letter-spacing: 2px;
+      color: #edd9a6;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(198, 155, 62, 0.3);
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      font-family: var(--font-heading);
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      color: var(--gold-accent);
+      text-transform: uppercase;
+      display: block;
+    }
+
+    /* Search & Nav Elements */
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+    }
+
+    .search-wrapper {
+      position: relative;
+      width: 270px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 34px;
+      background: rgba(18, 12, 7, 0.75);
+      border: 1px solid var(--border-ornate);
+      border-radius: 4px;
+      padding: 0 32px 0 36px;
+      color: #f0e4cc;
+      font-family: var(--font-heading);
+      font-size: 0.82rem;
+      letter-spacing: 0.5px;
+      outline: none;
+      transition: all 0.25s ease;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+    }
+    .search-input:focus {
+      border-color: var(--gold-bright);
+      box-shadow: 0 0 12px rgba(229, 185, 90, 0.35), inset 0 2px 6px rgba(0,0,0,0.7);
+      background: rgba(10, 6, 3, 0.9);
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      fill: var(--gold-accent);
+      pointer-events: none;
+      opacity: 0.8;
+    }
+    .search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--gold-accent);
+      cursor: pointer;
+      font-size: 14px;
+      display: none;
+    }
+
+    /* Auto-suggest dropdown */
+    .search-dropdown {
+      position: absolute;
+      top: 42px;
+      left: 0;
+      right: 0;
+      background: #20150d;
+      border: 1px solid var(--border-ornate);
+      border-radius: 4px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+      max-height: 380px;
+      overflow-y: auto;
+      display: none;
+      z-index: 200;
+    }
+    .search-dropdown.active {
+      display: block;
+    }
+    .search-item {
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(140, 110, 61, 0.15);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .search-item:hover, .search-item.selected {
+      background: rgba(198, 155, 62, 0.25);
+    }
+    .search-item-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .search-item-title {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      color: #edd9a6;
+      font-weight: 700;
+    }
+    .search-item-sub {
+      font-size: 0.72rem;
+      color: #ab9573;
+    }
+    .search-item-badge {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--gold-bright);
+      border: 1px solid rgba(198, 155, 62, 0.4);
+      font-family: var(--font-heading);
+    }
+
+    /* Top Action Buttons */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-medieval {
+      background: linear-gradient(180deg, #3d2715 0%, #201309 100%);
+      border: 1px solid var(--border-ornate);
+      color: #edd9a6;
+      font-family: var(--font-heading);
+      font-size: 0.76rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .btn-medieval:hover {
+      background: linear-gradient(180deg, #573921 0%, #301d0f 100%);
+      border-color: var(--gold-bright);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(198, 155, 62, 0.4);
+    }
+    .btn-medieval.active {
+      background: linear-gradient(180deg, #741d14 0%, #44110c 100%);
+      border-color: #d15143;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(209, 81, 67, 0.5);
+    }
+
+    .btn-icon-only {
+      padding: 7px 9px;
+    }
+
+    /* ==========================================================================
+       MAIN MAP STAGE
+       ========================================================================== */
+    #map-viewport {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 90px);
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+    }
+    #map-viewport.panning {
+      cursor: grabbing;
+    }
+
+    /* SVG Canvas */
+    #map-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    /* Canvas Atmospheric Fog / Mist Overlay */
+    #fog-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.28;
+      mix-blend-mode: screen;
+    }
+
+    /* ==========================================================================
+       MAP SVG STYLING & ELEMENTS
+       ========================================================================== */
+    .sea-background {
+      fill: #cebe97;
+      transition: fill 0.3s ease;
+    }
+
+    .sea-texture-grid line {
+      stroke: #baa77a;
+      stroke-width: 0.5;
+      stroke-opacity: 0.35;
+      stroke-dasharray: 4, 8;
+    }
+
+    /* Landmass & Shading */
+    .landmass-westeros, .landmass-essos, .island {
+      fill: #e8dcb9;
+      stroke: #3c2a17;
+      stroke-width: 2.2;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      filter: drop-shadow(2px 3px 5px rgba(45, 30, 15, 0.45));
+      transition: fill 0.3s ease, filter 0.3s ease;
+    }
+
+    .landmass-beyond-wall {
+      fill: #ebe7de;
+    }
+
+    .coastal-shading {
+      fill: none;
+      stroke: #b59f73;
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.6;
+    }
+
+    .coastal-contour {
+      fill: none;
+      stroke: #c2b189;
+      stroke-width: 1.5;
+      stroke-dasharray: 3, 5;
+      opacity: 0.7;
+    }
+
+    /* Regions Highlighting */
+    .region-layer {
+      fill: transparent;
+      stroke: transparent;
+      stroke-width: 1.5;
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+    .region-layer:hover {
+      fill: rgba(198, 155, 62, 0.12);
+    }
+    .region-layer.highlighted {
+      fill: rgba(198, 155, 62, 0.28);
+      stroke: #875c1c;
+      stroke-width: 2.5;
+      stroke-dasharray: 6, 4;
+      filter: drop-shadow(0 0 12px rgba(198, 155, 62, 0.7));
+    }
+
+    /* Rivers & Lakes */
+    .water-feature {
+      fill: #c0af88;
+      stroke: #5a452d;
+      stroke-width: 1;
+    }
+
+    .river {
+      fill: none;
+      stroke: #4e3c27;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .river-main { stroke-width: 3.2; }
+    .river-sub { stroke-width: 2; }
+    .river-tributary { stroke-width: 1.2; stroke-dasharray: 6, 2; }
+
+    /* Mountain & Terrain styling */
+    .mountain-group path {
+      fill: #d5c39b;
+      stroke: #332010;
+      stroke-width: 1.2;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+    .mountain-shadow {
+      fill: #a8946e !important;
+      opacity: 0.6;
+    }
+
+    /* Forests */
+    .forest-tree {
+      fill: #555d42;
+      stroke: #2a331c;
+      stroke-width: 0.8;
+      opacity: 0.85;
+    }
+    .forest-tree.haunted {
+      fill: #6d7870;
+      stroke: #353d37;
+    }
+
+    /* Roads */
+    .trade-road {
+      fill: none;
+      stroke: #873822;
+      stroke-width: 1.5;
+      stroke-dasharray: 4, 3;
+      stroke-linecap: round;
+      opacity: 0.75;
+    }
+    .kingsroad {
+      stroke: #661d15;
+      stroke-width: 2.2;
+      stroke-dasharray: 5, 2.5;
+    }
+
+    /* The Wall */
+    .the-wall {
+      stroke: #456275;
+      stroke-width: 6;
+      stroke-linecap: square;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+    .the-wall-ice {
+      stroke: #d9e8f5;
+      stroke-width: 3.5;
+      stroke-linecap: square;
+    }
+
+    /* Map Typography */
+    .region-label {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      fill: #44321d;
+      text-anchor: middle;
+      pointer-events: none;
+      opacity: 0.75;
+      text-shadow: 1px 1px 0px rgba(255, 245, 220, 0.8), -1px -1px 0px rgba(255, 245, 220, 0.8);
+    }
+    .sea-label {
+      font-family: var(--font-heading);
+      font-weight: 500;
+      letter-spacing: 6px;
+      font-style: italic;
+      text-transform: uppercase;
+      fill: #786644;
+      text-anchor: middle;
+      pointer-events: none;
+      opacity: 0.65;
+    }
+
+    /* Location Markers */
+    .location-marker {
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .location-marker:hover {
+      transform: scale(1.35);
+    }
+    .location-marker.active {
+      transform: scale(1.5);
+    }
+    .marker-pin-outer {
+      fill: #22150a;
+      stroke: var(--gold-bright);
+      stroke-width: 1.5;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.7));
+    }
+    .marker-pin-inner {
+      fill: var(--gold-accent);
+    }
+    .marker-city {
+      fill: #781d1d;
+      stroke: #e6b85c;
+    }
+    .marker-castle {
+      fill: #253342;
+      stroke: #d0dbe5;
+    }
+    .marker-ruin {
+      fill: #4b3e34;
+      stroke: #8c7867;
+    }
+
+    .location-title {
+      font-family: var(--font-heading);
+      font-size: 11px;
+      font-weight: 700;
+      fill: #1a1007;
+      text-anchor: middle;
+      pointer-events: none;
+      text-shadow: 1px 1px 2px #fff6dc, -1px -1px 2px #fff6dc, 0 0 4px #fff;
+    }
+
+    /* Travel Route Line */
+    .travel-route-shadow {
+      fill: none;
+      stroke: rgba(0, 0, 0, 0.5);
+      stroke-width: 5;
+      stroke-linecap: round;
+    }
+    .travel-route-line {
+      fill: none;
+      stroke: #9e1f14;
+      stroke-width: 3.5;
+      stroke-dasharray: 10, 8;
+      stroke-linecap: round;
+      animation: dashAnimation 2s linear infinite;
+    }
+    @keyframes dashAnimation {
+      from { stroke-dashoffset: 36; }
+      to { stroke-dashoffset: 0; }
+    }
+    .travel-marker {
+      fill: #ffd700;
+      stroke: #500e0e;
+      stroke-width: 2;
+      filter: drop-shadow(0 0 8px #ff4500);
+    }
+
+    /* ==========================================================================
+       MAP OVERLAYS & HUD CONTROLS
+       ========================================================================== */
+    .hud-controls {
+      position: absolute;
+      right: 24px;
+      bottom: 48px;
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-hud {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(180deg, #372414 0%, #1c1108 100%);
+      border: 1px solid var(--border-ornate);
+      border-radius: 4px;
+      color: #edd9a6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      font-size: 18px;
+    }
+    .btn-hud:hover {
+      background: linear-gradient(180deg, #53361e 0%, #2a190b 100%);
+      border-color: var(--gold-bright);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.8), 0 0 10px rgba(229, 185, 90, 0.4);
+    }
+
+    /* Compass Rose in Corner */
+    .compass-container {
+      position: absolute;
+      left: 28px;
+      bottom: 48px;
+      width: 110px;
+      height: 110px;
+      pointer-events: none;
+      z-index: 70;
+      opacity: 0.88;
+      filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.6));
+    }
+
+    /* Filter pills */
+    .map-filter-bar {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(22, 14, 7, 0.85);
+      padding: 5px 10px;
+      border-radius: 30px;
+      border: 1px solid var(--border-ornate);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.65);
+      backdrop-filter: blur(5px);
+    }
+    .filter-chip {
+      background: transparent;
+      border: none;
+      color: #ab9573;
+      font-family: var(--font-heading);
+      font-size: 0.72rem;
+      letter-spacing: 0.8px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-chip:hover {
+      color: #edd9a6;
+      background: rgba(198, 155, 62, 0.2);
+    }
+    .filter-chip.active {
+      color: #1a0f07;
+      background: var(--gold-bright);
+      font-weight: 700;
+      box-shadow: 0 0 8px rgba(229, 185, 90, 0.5);
+    }
+
+    /* ==========================================================================
+       SIDE INFORMATION PANEL (MAESTER'S SCROLL)
+       ========================================================================== */
+    #info-panel {
+      position: absolute;
+      top: 72px;
+      right: -420px;
+      width: 390px;
+      max-height: calc(100vh - 120px);
+      z-index: 95;
+      background: radial-gradient(circle at 50% 10%, #f6edd4 0%, #e8dcb7 60%, #cebc8f 100%);
+      border: 2px solid var(--border-ornate);
+      border-radius: 6px;
+      box-shadow: -8px 12px 36px rgba(0, 0, 0, 0.85), 0 0 0 1px #2a1a0d;
+      transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      color: var(--ink-dark);
+    }
+    #info-panel.open {
+      right: 24px;
+    }
+
+    .panel-header {
+      position: relative;
+      padding: 20px 20px 14px;
+      background: linear-gradient(180deg, #382312 0%, #201308 100%);
+      border-bottom: 2px solid var(--border-ornate);
+      color: #edd9a6;
+    }
+    .panel-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-ornate);
+      color: var(--gold-bright);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    .panel-close-btn:hover {
+      background: #7a1d1d;
+      border-color: #e6b85c;
+      color: #fff;
+    }
+
+    .panel-region-tag {
+      font-family: var(--font-heading);
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold-accent);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      letter-spacing: 1.5px;
+      color: #fff2d1;
+      line-height: 1.2;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .panel-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* House Card inside Panel */
+    .house-badge-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      background: rgba(56, 35, 18, 0.08);
+      border: 1px solid #c2ac7f;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .house-badge-sigil {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #25180f;
+      border: 2px solid var(--border-ornate);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    }
+    .house-badge-sigil svg {
+      width: 100%;
+      height: 100%;
+    }
+    .house-badge-details {
+      display: flex;
+      flex-direction: column;
+    }
+    .house-badge-name {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #2b1c10;
+    }
+    .house-badge-words {
+      font-family: var(--font-lore);
+      font-style: italic;
+      font-size: 0.88rem;
+      color: #791e14;
+    }
+
+    .panel-section-title {
+      font-family: var(--font-heading);
+      font-size: 0.76rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #523e27;
+      border-bottom: 1px dashed #b8a274;
+      padding-bottom: 4px;
+      margin: 14px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .panel-lore {
+      font-family: var(--font-body);
+      font-size: 0.94rem;
+      color: #2a1f15;
+      text-align: justify;
+      margin-bottom: 14px;
+    }
+
+    .panel-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid #c9b488;
+      border-radius: 4px;
+      padding: 6px 10px;
+    }
+    .stat-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      font-family: var(--font-heading);
+      color: #70583a;
+      display: block;
+    }
+    .stat-value {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #1e130a;
+    }
+
+    .panel-actions {
+      padding: 14px 20px;
+      background: #decfa8;
+      border-top: 1px solid #baa677;
+      display: flex;
+      gap: 8px;
+    }
+    .panel-btn {
+      flex: 1;
+      padding: 8px 10px;
+      font-family: var(--font-heading);
+      font-size: 0.72rem;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      background: #382414;
+      color: #edd9a6;
+      border: 1px solid var(--border-ornate);
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .panel-btn:hover {
+      background: #54371f;
+      border-color: var(--gold-bright);
+      color: #fff;
+    }
+
+    /* ==========================================================================
+       MODALS (HOUSES COMPENDIUM & TRAVEL PLANNER)
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(14, 8, 4, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 820px;
+      max-height: 85vh;
+      background: radial-gradient(circle at 50% 20%, #f7f1dd 0%, #ebdcb3 60%, #cbba8d 100%);
+      border: 3px solid var(--border-ornate);
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      background: linear-gradient(180deg, #372312 0%, #1e1208 100%);
+      border-bottom: 2px solid var(--border-ornate);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #edd9a6;
+    }
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      color: #fff2d1;
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* Houses Grid in Compendium */
+    .houses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
+    }
+    .house-card {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid #bfab7c;
+      border-radius: 6px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .house-card:hover {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: var(--gold-bright);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    .house-card-sigil {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #25170d;
+      border: 2px solid var(--border-ornate);
+      margin-bottom: 12px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .house-card-name {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1rem;
+      color: #2b1b0d;
+      margin-bottom: 4px;
+    }
+    .house-card-words {
+      font-family: var(--font-lore);
+      font-style: italic;
+      color: #7b1d14;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+    .house-card-seat {
+      font-size: 0.78rem;
+      color: #5c472d;
+    }
+
+    /* Travel Calculator Form */
+    .travel-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .travel-inputs-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+    .travel-select-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .travel-label {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #4b361e;
+    }
+    .travel-select {
+      height: 38px;
+      background: #fff8e8;
+      border: 1px solid #b8a272;
+      border-radius: 4px;
+      padding: 0 10px;
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      color: #221408;
+      outline: none;
+    }
+    .travel-swap-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border-ornate);
+      background: #372314;
+      color: var(--gold-bright);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .travel-results-card {
+      background: rgba(64, 42, 22, 0.08);
+      border: 1px solid #baa678;
+      border-radius: 6px;
+      padding: 18px;
+      margin-top: 10px;
+    }
+    .travel-times-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .travel-speed-box {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid #c2b088;
+      border-radius: 4px;
+      padding: 10px;
+      text-align: center;
+    }
+    .speed-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .speed-method {
+      font-family: var(--font-heading);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      color: #634b2f;
+      display: block;
+    }
+    .speed-duration {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #1e1308;
+    }
+
+    /* ==========================================================================
+       BOTTOM STATUS & METRICS BAR
+       ========================================================================== */
+    #bottom-bar {
+      position: relative;
+      z-index: 90;
+      height: 30px;
+      background: linear-gradient(180deg, #2b1b0e 0%, #170d06 100%);
+      border-top: 1px solid var(--border-ornate);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: 0.72rem;
+      color: #ab9573;
+      letter-spacing: 0.8px;
+    }
+    .coord-display {
+      font-family: var(--font-heading);
+      color: #d8c49e;
+    }
+    .scale-bar-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .scale-ruler {
+      width: 90px;
+      height: 4px;
+      background: #735733;
+      position: relative;
+      border: 1px solid #d8c49e;
+    }
+    .scale-ruler::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: -3px;
+      width: 1px;
+      height: 10px;
+      background: #d8c49e;
+    }
+    .scale-ruler::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -3px;
+      width: 1px;
+      height: 10px;
+      background: #d8c49e;
+    }
+
+    /* ==========================================================================
+       MOBILE BOTTOM NAVIGATION BAR
+       ========================================================================== */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: linear-gradient(180deg, #2c1a0e 0%, #150c05 100%);
+      border-top: 2px solid var(--border-ornate);
+      z-index: 200;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.75);
+    }
+    .mobile-nav-btn {
+      background: none;
+      border: none;
+      color: #b09977;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-family: var(--font-heading);
+      font-size: 0.62rem;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      cursor: pointer;
+      flex: 1;
+      height: 100%;
+      transition: color 0.2s ease, transform 0.15s ease;
+      touch-action: manipulation;
+    }
+    .mobile-nav-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+    .mobile-nav-btn:active, .mobile-nav-btn.active {
+      color: var(--gold-bright);
+      transform: scale(0.94);
+    }
+
+    .drawer-drag-pill {
+      display: none;
+      width: 38px;
+      height: 4px;
+      background: #c69b3e;
+      border-radius: 2px;
+      margin: 8px auto 4px;
+      opacity: 0.75;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE TWEAKS & MOBILE OPTIMIZATIONS
+       ========================================================================== */
+    @media (max-width: 768px) {
+      #app-container {
+        height: 100vh;
+        height: 100dvh;
+      }
+
+      /* Compact Top Header */
+      #top-bar {
+        height: 52px;
+        padding: 0 10px;
+      }
+      .brand-crest {
+        width: 24px;
+        height: 24px;
+      }
+      .brand-text h1 {
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+      }
+      .brand-text span {
+        display: none;
+      }
+      .nav-center {
+        flex: 1;
+        max-width: 175px;
+        margin: 0 6px;
+      }
+      .search-wrapper {
+        width: 100%;
+      }
+      .search-input {
+        height: 32px;
+        font-size: 0.76rem;
+        padding: 0 24px 0 28px;
+      }
+      .search-icon {
+        left: 8px;
+        width: 14px;
+        height: 14px;
+      }
+      .search-dropdown {
+        position: fixed;
+        top: 54px;
+        left: 10px;
+        right: 10px;
+        max-height: 55vh;
+        z-index: 250;
+      }
+      .nav-actions #btn-open-houses,
+      .nav-actions #btn-open-travel,
+      .nav-actions #btn-audio-toggle {
+        display: none;
+      }
+
+      /* Scrollable Filter Chips Bar */
+      .map-filter-bar {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        transform: none;
+        max-width: calc(100vw - 16px);
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 4px 6px;
+        display: flex;
+        justify-content: flex-start;
+        gap: 5px;
+      }
+      .map-filter-bar::-webkit-scrollbar {
+        display: none;
+      }
+      .filter-chip {
+        padding: 4px 10px;
+        font-size: 0.68rem;
+        flex-shrink: 0;
+      }
+      #region-dropdown-select {
+        height: 26px;
+        font-size: 0.68rem;
+        flex-shrink: 0;
+        margin-left: 2px;
+      }
+
+      /* HUD Controls */
+      .hud-controls {
+        right: 12px;
+        bottom: 84px;
+        gap: 6px;
+      }
+      .btn-hud {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+      }
+      .compass-container {
+        display: none;
+      }
+
+      /* Bottom Status Bar */
+      #bottom-bar {
+        position: absolute;
+        bottom: 56px;
+        left: 0;
+        right: 0;
+        height: 24px;
+        padding: 0 10px;
+        font-size: 0.64rem;
+        z-index: 80;
+        pointer-events: none;
+        background: rgba(28, 17, 9, 0.88);
+        backdrop-filter: blur(4px);
+      }
+      #bottom-bar div:last-child {
+        display: none;
+      }
+      .scale-ruler {
+        width: 50px;
+      }
+
+      /* Bottom Sheet Drawer for Info Panel */
+      .drawer-drag-pill {
+        display: block;
+      }
+      #info-panel {
+        top: auto;
+        bottom: -100vh;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-height: 72vh;
+        border-radius: 18px 18px 0 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.85);
+        transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 190;
+      }
+      #info-panel.open {
+        bottom: 56px;
+        right: 0;
+      }
+      .panel-header {
+        padding: 6px 16px 12px;
+      }
+      .panel-close-btn {
+        top: 10px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+      }
+      .panel-title {
+        font-size: 1.2rem;
+      }
+      .panel-body {
+        padding: 12px 16px;
+      }
+      .panel-actions {
+        padding: 10px 16px;
+        margin-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      /* Modals Responsive Bottom Sheet */
+      .modal-backdrop {
+        padding: 8px;
+        align-items: flex-end;
+      }
+      .modal-box {
+        max-width: 100%;
+        max-height: 84vh;
+        border-radius: 16px 16px 0 0;
+        border-bottom: none;
+      }
+      .modal-header {
+        padding: 12px 16px;
+      }
+      .modal-title {
+        font-size: 1.05rem;
+      }
+      .modal-body {
+        padding: 12px;
+      }
+      .houses-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .house-card {
+        padding: 10px 6px;
+      }
+      .house-card-sigil {
+        width: 44px;
+        height: 44px;
+        margin-bottom: 6px;
+      }
+      .house-card-name {
+        font-size: 0.84rem;
+      }
+      .house-card-words {
+        font-size: 0.74rem;
+      }
+      .house-card-seat {
+        font-size: 0.68rem;
+      }
+      .travel-inputs-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .travel-swap-btn {
+        margin: 2px auto;
+        transform: rotate(90deg);
+      }
+      .travel-times-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      /* Show Mobile Navigation Bar */
+      .mobile-bottom-nav {
+        display: flex;
+      }
+    }
+  </style>
 </head>
-<body class="landing">
+<body>
 
-  <canvas id="emberCanvas"></canvas>
-  <div class="film-grain"></div>
-
-  <div class="landing-content">
-    <div class="sigil-container">
-      <div class="sigil-ring"></div>
-      <div class="sigil-ring delay"></div>
-      <span class="sigil">🐉</span>
-    </div>
+  <div id="app-container">
     
-    <h1 class="title-main">GAME OF<br>THRONES</h1>
-    <h2 class="title-sub">The Realms of Westeros</h2>
-    <p class="motto">"When you play the game of thrones, you win or you die."</p>
+    <!-- Weathered Map Perimeter & Brass Fittings -->
+    <div class="map-frame-border"></div>
+    <svg class="corner-ornament corner-tl" viewBox="0 0 40 40">
+      <path d="M0,0 L40,0 L40,8 L8,8 L8,40 L0,40 Z M12,12 L28,12 L28,16 L16,16 L16,28 L12,28 Z" />
+    </svg>
+    <svg class="corner-ornament corner-tr" viewBox="0 0 40 40">
+      <path d="M0,0 L40,0 L40,8 L8,8 L8,40 L0,40 Z M12,12 L28,12 L28,16 L16,16 L16,28 L12,28 Z" />
+    </svg>
+    <svg class="corner-ornament corner-bl" viewBox="0 0 40 40">
+      <path d="M0,0 L40,0 L40,8 L8,8 L8,40 L0,40 Z M12,12 L28,12 L28,16 L16,16 L16,28 L12,28 Z" />
+    </svg>
+    <svg class="corner-ornament corner-br" viewBox="0 0 40 40">
+      <path d="M0,0 L40,0 L40,8 L8,8 L8,40 L0,40 Z M12,12 L28,12 L28,16 L16,16 L16,28 L12,28 Z" />
+    </svg>
 
-    <a href="map.html" class="enter-btn">
-      <span class="btn-text">Enter the Realm</span>
-      <div class="sword-divider"><span>⚔</span></div>
-    </a>
+    <!-- Top Navigation Header -->
+    <header id="top-bar">
+      <div class="brand-title" id="btn-brand-home" title="Center Full World View">
+        <svg class="brand-crest" viewBox="0 0 24 24">
+          <path d="M12 2L15 9H22L16.5 13.5L18.5 20.5L12 16L5.5 20.5L7.5 13.5L2 9H9L12 2Z" />
+        </svg>
+        <div class="brand-text">
+          <h1>The Known World</h1>
+          <span>Archmaester's Cartographic Survey</span>
+        </div>
+      </div>
 
-    <div class="houses-label">Explore the Great Houses</div>
-    <div class="houses-strip">
-      <button class="house-btn" data-house="stark">Stark</button>
-      <button class="house-btn" data-house="lannister">Lannister</button>
-      <button class="house-btn" data-house="targaryen">Targaryen</button>
-      <button class="house-btn" data-house="baratheon">Baratheon</button>
-      <button class="house-btn" data-house="tyrell">Tyrell</button>
-      <button class="house-btn" data-house="martell">Martell</button>
-      <button class="house-btn" data-house="greyjoy">Greyjoy</button>
-      <button class="house-btn" data-house="arryn">Arryn</button>
-      <button class="house-btn" data-house="tully">Tully</button>
-    </div>
-  </div>
+      <!-- Quick Search Bar -->
+      <div class="nav-center">
+        <div class="search-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input type="text" id="map-search-input" class="search-input" placeholder="Search castles, cities, houses..." autocomplete="off">
+          <button id="search-clear-btn" class="search-clear">&times;</button>
+          <div id="search-dropdown" class="search-dropdown"></div>
+        </div>
+      </div>
 
-  <!-- House Modal -->
-  <div id="houseModal" class="house-modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop"></div>
-    <div class="modal-sheet">
-      <div class="modal-drag-handle"></div>
-      <button class="modal-close" onclick="closeHouseModal()" aria-label="Close">✕</button>
-      <div class="modal-scroll">
+      <!-- Navigation & Compendium Actions -->
+      <div class="nav-actions">
+        <button id="btn-open-houses" class="btn-medieval" title="View Great Noble Houses of the Realm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+          </svg>
+          <span>Noble Houses</span>
+        </button>
+
+        <button id="btn-open-travel" class="btn-medieval" title="Calculate Travel Distance and March Times">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          <span>Travel Route</span>
+        </button>
+
+        <button id="btn-audio-toggle" class="btn-medieval btn-icon-only" title="Toggle Citadel Ambient Atmosphere">
+          <svg id="audio-icon-off" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+          </svg>
+          <svg id="audio-icon-on" style="display:none;" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Map Viewport -->
+    <main id="map-viewport">
+      
+      <!-- Filter Chips Bar -->
+      <div class="map-filter-bar">
+        <button class="filter-chip active" data-filter="all">All Realms</button>
+        <button class="filter-chip" data-filter="westeros">Westeros</button>
+        <button class="filter-chip" data-filter="essos">Essos</button>
+        <button class="filter-chip" data-filter="castles">Great Castles</button>
+        <button class="filter-chip" data-filter="cities">Free Cities</button>
+        
+        <!-- Region Quick Selector -->
+        <select id="region-dropdown-select" class="travel-select" style="height:26px; font-size:0.72rem; padding:0 8px; background:rgba(30,18,10,0.85); color:#edd9a6; border-color:var(--border-ornate); margin-left:6px;">
+          <option value="">-- Jump to Region --</option>
+          <option value="The North">The North</option>
+          <option value="Beyond the Wall">Beyond the Wall</option>
+          <option value="The Riverlands">The Riverlands</option>
+          <option value="The Vale of Arryn">The Vale of Arryn</option>
+          <option value="The Westerlands">The Westerlands</option>
+          <option value="The Iron Islands">The Iron Islands</option>
+          <option value="The Crownlands">The Crownlands</option>
+          <option value="The Reach">The Reach</option>
+          <option value="The Stormlands">The Stormlands</option>
+          <option value="Dorne">Dorne</option>
+          <option value="The Free Cities">The Free Cities</option>
+          <option value="Slaver's Bay">Slaver's Bay</option>
+          <option value="The Dothraki Sea">The Dothraki Sea</option>
+          <option value="Qarth & Jade Gates">Qarth & Jade Gates</option>
+          <option value="Asshai & The Shadow">Asshai & The Shadow</option>
+        </select>
+      </div>
+
+      <!-- Canvas for Drifting Weather / Fog / Embers -->
+      <canvas id="fog-canvas"></canvas>
+
+      <!-- SVG Map Canvas (3200 x 2000 coordinate space) -->
+      <svg id="map-svg" viewBox="0 0 3200 2000" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- Parchment Grain / Weathered Noise Filter -->
+          <filter id="parchment-grain" x="0%" y="0%" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+            <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.15 0" />
+            <feComposite in2="SourceGraphic" in="glint" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+          </filter>
+
+          <!-- Mountain Peak Pattern Symbols -->
+          <g id="mountain-symbol">
+            <path d="M0,28 L18,0 L36,28 Z" fill="#d9cbb2" stroke="#4a3720" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M18,0 L36,28 L18,28 Z" fill="#bfae91" opacity="0.65" />
+            <path d="M18,0 L18,28" stroke="#4a3720" stroke-width="1.2" />
+            <path d="M11,10 L18,14 L25,10" stroke="#4a3720" stroke-width="1" fill="none" />
+          </g>
+          <g id="mountain-snow">
+            <path d="M0,32 L20,0 L40,32 Z" fill="#ebe3d3" stroke="#423321" stroke-width="2" stroke-linejoin="round" />
+            <path d="M20,0 L40,32 L20,32 Z" fill="#c9bca4" opacity="0.6" />
+            <path d="M20,0 L14,10 L20,13 L26,9 Z" fill="#ffffff" stroke="#423321" stroke-width="0.8" />
+          </g>
+
+          <!-- Tree Symbol -->
+          <g id="tree-symbol">
+            <path d="M7,16 L7,22" stroke="#3d2a1a" stroke-width="2" />
+            <circle cx="7" cy="11" r="7" fill="#626b4f" stroke="#2c351f" stroke-width="1" />
+            <circle cx="10" cy="13" r="5" fill="#4f573d" opacity="0.6" />
+          </g>
+          <g id="pine-symbol">
+            <path d="M6,18 L6,24" stroke="#322214" stroke-width="2" />
+            <polygon points="6,2 1,10 4,10 0,18 12,18 8,10 11,10" fill="#4d5947" stroke="#252f21" stroke-width="1" />
+          </g>
+
+          <!-- Castle Marker Icon -->
+          <g id="icon-castle">
+            <rect x="-8" y="-7" width="16" height="14" fill="#2d1c10" stroke="#edd9a6" stroke-width="1.2" />
+            <polygon points="-8,-7 -8,-11 -5,-11 -5,-7 -2,-7 -2,-11 2,-11 2,-7 5,-7 5,-11 8,-11 8,-7" fill="#edd9a6" />
+            <rect x="-2" y="1" width="4" height="6" fill="#000" />
+          </g>
+
+          <!-- City / Port Marker Icon -->
+          <g id="icon-city">
+            <circle cx="0" cy="0" r="7" fill="#821d1d" stroke="#f0caa1" stroke-width="1.8" />
+            <circle cx="0" cy="0" r="3" fill="#ffd700" />
+          </g>
+
+          <!-- Ruin / Mystic Marker Icon -->
+          <g id="icon-ruin">
+            <polygon points="0,-8 7,6 -7,6" fill="#3a4750" stroke="#f0caa1" stroke-width="1.5" />
+            <circle cx="0" cy="0" r="2" fill="#d9e2ec" />
+          </g>
+        </defs>
+
+        <!-- Dynamic World Group (Panned and Zoomed via Script) -->
+        <g id="map-world">
+          
+          <!-- Ocean Background with Rhumb Lines -->
+          <rect class="sea-background" x="-1000" y="-1000" width="5200" height="4000" />
+
+          <!-- Rhumb Nautical Lines -->
+          <g class="sea-texture-grid">
+            <line x1="600" y1="200" x2="2600" y2="1800" />
+            <line x1="600" y1="1800" x2="2600" y2="200" />
+            <line x1="1600" y1="0" x2="1600" y2="2000" />
+            <line x1="0" y1="1000" x2="3200" y2="1000" />
+            <line x1="300" y1="1200" x2="1800" y2="200" />
+            <line x1="1200" y1="1800" x2="2800" y2="800" />
+            <circle cx="1600" cy="1000" r="700" fill="none" stroke="#baa77a" stroke-width="0.7" stroke-dasharray="8, 12" />
+          </g>
+
+          <!-- Sea Monster & Antique Sailing Galleon Illustrations -->
+          <g id="sea-illustrations" opacity="0.45" stroke="#4a3720" fill="none">
+            <!-- Galleon in Sunset Sea -->
+            <g transform="translate(140, 1000) scale(0.9)">
+              <path d="M10,25 C25,32 55,32 70,25 C60,40 20,40 10,25 Z" fill="#d9cbb2" stroke-width="1.5"/>
+              <line x1="40" y1="25" x2="40" y2="2" stroke-width="2"/>
+              <path d="M40,5 C55,8 55,18 40,20 Z" fill="#ede2cb" stroke-width="1"/>
+              <line x1="25" y1="25" x2="25" y2="8" stroke-width="1.5"/>
+              <path d="M25,10 C15,13 15,20 25,22 Z" fill="#ede2cb" stroke-width="1"/>
+            </g>
+            <!-- Sea Serpent in Summer Sea -->
+            <g transform="translate(1080, 1780) scale(1)">
+              <path d="M0,20 Q20,0 40,20 T80,20 T120,20 T150,10" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M150,10 Q160,2 155,-5 Q145,-2 143,5" stroke-width="2" fill="#d9cbb2"/>
+            </g>
+          </g>
+
+          <!-- ==========================================================
+               GEOGRAPHICAL LANDMASSES
+               ========================================================== -->
+          <g id="layer-landmasses">
+            
+            <!-- WESTEROS MAIN CONTINENT -->
+            <!-- Accurate canonical coastline: Lands of Always Winter, Bay of Ice, Cape Kraken, Ironman's Bay,
+                 Whispering Sound, Red Mountains, Sunspear, Shipbreaker Bay, Blackwater Bay, Fingers, Bay of Seals -->
+            <path class="coastal-shading" d="
+              M 360,110 
+              C 300,160 210,230 230,340 
+              C 240,400 270,450 250,510 
+              C 210,560 170,580 160,650 
+              C 150,710 210,750 240,820 
+              C 260,880 230,940 220,990 
+              C 210,1030 250,1060 270,1100 
+              C 260,1140 240,1170 230,1210 
+              C 220,1270 240,1310 230,1370 
+              C 210,1430 180,1500 200,1570 
+              C 220,1630 270,1680 320,1730 
+              C 380,1770 470,1790 560,1790 
+              C 670,1790 770,1760 840,1720 
+              C 880,1690 870,1640 820,1620 
+              C 760,1600 710,1610 680,1560 
+              C 660,1520 730,1480 750,1430 
+              C 770,1380 720,1340 680,1310 
+              C 640,1280 670,1240 730,1240 
+              C 780,1230 810,1170 780,1120 
+              C 750,1080 790,1020 810,960 
+              C 830,910 770,860 720,860 
+              C 670,860 660,800 680,750 
+              C 710,690 740,640 710,570 
+              C 680,520 700,460 670,410 
+              C 640,360 670,290 620,220 
+              C 580,160 520,120 450,110 Z" />
+
+            <path class="landmass-westeros" id="poly-westeros" d="
+              M 370,120 
+              C 310,170 220,240 240,350 
+              C 250,410 280,460 260,520 
+              C 220,570 180,590 170,660 
+              C 160,720 220,760 250,830 
+              C 270,890 240,950 230,1000 
+              C 220,1040 260,1070 280,1110 
+              C 270,1150 250,1180 240,1220 
+              C 230,1280 250,1320 240,1380 
+              C 220,1440 190,1510 210,1580 
+              C 230,1640 280,1690 330,1740 
+              C 390,1780 480,1800 570,1800 
+              C 680,1800 780,1770 850,1730 
+              C 890,1700 880,1650 830,1630 
+              C 770,1610 720,1620 690,1570 
+              C 670,1530 740,1490 760,1440 
+              C 780,1390 730,1350 690,1320 
+              C 650,1290 680,1250 740,1250 
+              C 790,1240 820,1180 790,1130 
+              C 760,1090 800,1030 820,970 
+              C 840,920 780,870 730,870 
+              C 680,870 670,810 690,760 
+              C 720,700 750,650 720,580 
+              C 690,530 710,470 680,420 
+              C 650,370 680,300 630,230 
+              C 590,170 530,130 460,120 Z" />
+
+            <!-- ESSOS MAIN CONTINENT & LANDMASSES -->
+            <!-- Braavos lagoon peninsula, Flatlands, Pentoshi Bay, Disputed Lands, Rhoyne Basin,
+                 Valyrian Peninsula, Slaver's Bay, Dothraki Sea, Red Waste, Qarth, Jade Gates, Asshai & Shadow Lands -->
+            <path class="coastal-shading" d="
+              M 1080,620 
+              C 1050,670 1060,760 1040,840 
+              C 1010,910 1030,1010 1010,1100 
+              C 990,1180 1010,1290 980,1380 
+              C 950,1460 990,1540 1040,1620 
+              C 1110,1670 1240,1660 1350,1640 
+              C 1460,1620 1520,1530 1620,1510 
+              C 1680,1530 1720,1680 1750,1760 
+              C 1780,1830 1830,1820 1860,1740 
+              C 1890,1630 1950,1540 2000,1500 
+              C 2050,1540 2130,1640 2200,1690 
+              C 2290,1740 2400,1720 2450,1640 
+              C 2490,1570 2560,1540 2650,1580 
+              C 2750,1630 2860,1700 2970,1720 
+              C 3080,1710 3150,1640 3180,1520 
+              C 3190,1350 3140,1180 3090,1050 
+              C 3040,910 3010,750 2940,640 
+              C 2850,540 2680,490 2530,510 
+              C 2380,530 2240,480 2090,490 
+              C 1920,510 1780,470 1620,500 
+              C 1480,520 1340,490 1210,520 
+              C 1140,540 1100,570 1080,620 Z" />
+
+            <path class="landmass-essos" id="poly-essos" d="
+              M 1090,630 
+              C 1060,680 1070,770 1050,850 
+              C 1020,920 1040,1020 1020,1110 
+              C 1000,1190 1020,1300 990,1390 
+              C 960,1470 1000,1550 1050,1630 
+              C 1120,1680 1250,1670 1360,1650 
+              C 1470,1630 1530,1540 1630,1520 
+              C 1690,1540 1730,1690 1760,1770 
+              C 1790,1840 1840,1830 1870,1750 
+              C 1900,1640 1960,1550 2010,1510 
+              C 2060,1550 2140,1650 2210,1700 
+              C 2300,1750 2410,1730 2460,1650 
+              C 2500,1580 2570,1550 2660,1590 
+              C 2760,1640 2870,1710 2980,1730 
+              C 3090,1720 3160,1650 3190,1530 
+              C 3200,1360 3150,1190 3100,1060 
+              C 3050,920 3020,760 2950,650 
+              C 2860,550 2690,500 2540,520 
+              C 2390,540 2250,490 2100,500 
+              C 1930,520 1790,480 1630,510 
+              C 1490,530 1350,500 1220,530 
+              C 1150,550 1110,580 1090,630 Z" />
+
+            <!-- ISLANDS & ARCHIPELAGOS -->
+            <!-- Iron Islands (Pyke, Great Wyk, Harlaw) -->
+            <path class="island" d="M 230,1080 C 215,1070 210,1095 225,1105 C 240,1115 245,1090 230,1080 Z" />
+            <path class="island" d="M 205,1060 C 190,1050 185,1075 200,1085 C 215,1095 220,1070 205,1060 Z" />
+            <path class="island" d="M 235,1045 C 220,1035 225,1060 240,1060 C 250,1060 250,1045 235,1045 Z" />
+
+            <!-- Dragonstone & Driftmark -->
+            <path class="island" d="M 735,1250 C 725,1240 720,1260 735,1270 C 750,1275 755,1255 735,1250 Z" />
+            <path class="island" d="M 695,1265 C 685,1258 680,1272 695,1280 C 710,1285 712,1270 695,1265 Z" />
+
+            <!-- Bear Island (North Bay of Ice) -->
+            <path class="island" d="M 285,510 C 270,500 270,530 290,535 C 305,535 305,515 285,510 Z" />
+
+            <!-- Skagos (Bay of Seals) -->
+            <path class="island" d="M 760,420 C 730,400 730,450 765,465 C 795,470 805,435 760,420 Z" />
+
+            <!-- Tarth (Shipbreaker Bay) -->
+            <path class="island" d="M 770,1410 C 755,1400 755,1435 770,1445 C 790,1450 795,1420 770,1410 Z" />
+
+            <!-- The Arbor (South of Reach) -->
+            <path class="island" d="M 270,1720 C 240,1710 240,1750 275,1760 C 310,1765 315,1730 270,1720 Z" />
+
+            <!-- Stepstones Chain -->
+            <path class="island" d="M 830,1610 C 820,1605 820,1620 830,1625 C 840,1625 840,1610 830,1610 Z" />
+            <path class="island" d="M 865,1620 C 855,1615 855,1630 865,1635 C 875,1635 875,1620 865,1620 Z" />
+            <path class="island" d="M 910,1635 C 900,1630 900,1645 910,1650 C 920,1650 920,1635 910,1635 Z" />
+            <path class="island" d="M 960,1645 C 950,1640 950,1655 960,1660 C 970,1660 970,1645 960,1645 Z" />
+
+            <!-- Lys & Southern Essos Archipelagos -->
+            <path class="island" d="M 1090,1670 C 1075,1660 1075,1690 1100,1695 C 1120,1695 1115,1675 1090,1670 Z" />
+            
+            <!-- Fractured Islands of Valyria / The Doom -->
+            <path class="island" style="fill:#baaa8c;" d="M 1660,1620 C 1640,1600 1630,1640 1660,1650 C 1680,1655 1680,1630 1660,1620 Z" />
+            <path class="island" style="fill:#baaa8c;" d="M 1700,1670 C 1680,1655 1675,1690 1705,1700 C 1725,1700 1725,1680 1700,1670 Z" />
+            <path class="island" style="fill:#baaa8c;" d="M 1740,1630 C 1725,1620 1720,1650 1745,1660 C 1765,1665 1765,1640 1740,1630 Z" />
+          </g>
+
+          <!-- ==========================================================
+               REGION BOUNDARIES & HIGHLIGHT LAYERS
+               ========================================================== -->
+          <g id="layer-regions">
+            <!-- The North -->
+            <path id="region-north" class="region-layer" data-region="The North" d="
+              M 350,430 L 650,430 C 720,580 670,860 720,870 L 460,930 L 220,990 C 230,820 160,660 250,520 Z" />
+
+            <!-- The Riverlands -->
+            <path id="region-riverlands" class="region-layer" data-region="The Riverlands" d="
+              M 460,930 L 720,870 L 680,1180 L 590,1260 L 390,1220 L 370,1110 Z" />
+
+            <!-- The Vale of Arryn -->
+            <path id="region-vale" class="region-layer" data-region="The Vale of Arryn" d="
+              M 720,870 L 820,970 L 790,1130 L 740,1250 L 680,1180 Z" />
+
+            <!-- The Westerlands -->
+            <path id="region-westerlands" class="region-layer" data-region="The Westerlands" d="
+              M 370,1110 L 390,1220 L 440,1320 L 310,1380 L 240,1220 Z" />
+
+            <!-- The Iron Islands -->
+            <path id="region-iron-islands" class="region-layer" data-region="The Iron Islands" d="
+              M 170,1020 L 280,1020 L 280,1130 L 170,1130 Z" />
+
+            <!-- The Crownlands -->
+            <path id="region-crownlands" class="region-layer" data-region="The Crownlands" d="
+              M 590,1260 L 740,1250 L 780,1330 L 660,1370 L 540,1330 Z" />
+
+            <!-- The Reach -->
+            <path id="region-reach" class="region-layer" data-region="The Reach" d="
+              M 390,1220 L 540,1330 L 580,1480 L 480,1650 L 240,1720 L 220,1440 Z" />
+
+            <!-- The Stormlands -->
+            <path id="region-stormlands" class="region-layer" data-region="The Stormlands" d="
+              M 580,1340 L 740,1330 L 770,1450 L 690,1570 L 570,1520 Z" />
+
+            <!-- Dorne -->
+            <path id="region-dorne" class="region-layer" data-region="Dorne" d="
+              M 480,1650 L 690,1570 L 850,1730 L 570,1800 L 340,1750 Z" />
+
+            <!-- Beyond the Wall -->
+            <path id="region-beyond-wall" class="region-layer" data-region="Beyond the Wall" d="
+              M 370,120 L 630,230 L 650,430 L 350,430 L 240,350 Z" />
+
+            <!-- Essos: Free Cities -->
+            <path id="region-free-cities" class="region-layer" data-region="The Free Cities" d="
+              M 1090,630 L 1630,510 L 1630,1520 L 1050,1630 L 990,1390 Z" />
+
+            <!-- Essos: Slaver's Bay / Bay of Dragons -->
+            <path id="region-slavers-bay" class="region-layer" data-region="Slaver's Bay" d="
+              M 1880,1300 L 2200,1300 L 2210,1700 L 1870,1750 Z" />
+
+            <!-- Essos: Dothraki Sea -->
+            <path id="region-dothraki-sea" class="region-layer" data-region="The Dothraki Sea" d="
+              M 1630,510 L 2540,520 L 2460,1100 L 1750,1100 Z" />
+
+            <!-- Essos: Qarth & Jade Gates -->
+            <path id="region-qarth" class="region-layer" data-region="Qarth & Jade Gates" d="
+              M 2350,1350 L 2660,1350 L 2660,1650 L 2350,1650 Z" />
+
+            <!-- Essos: Asshai & The Shadow Lands -->
+            <path id="region-asshai" class="region-layer" data-region="Asshai & The Shadow" d="
+              M 2760,1200 L 3190,1200 L 3190,1750 L 2760,1750 Z" />
+          </g>
+
+          <!-- ==========================================================
+               WATER BODIES, RIVERS & LAKES
+               ========================================================== -->
+          <g id="layer-rivers">
+            <!-- God's Eye Lake (Harrenhal) -->
+            <ellipse class="water-feature" cx="560" cy="1190" rx="22" ry="16" />
+            <circle class="water-feature" cx="560" cy="1190" r="5" fill="#e8dcb9" /> <!-- Isle of Faces -->
+
+            <!-- Westeros Major Rivers -->
+            <!-- The Trident: Green Fork, Red Fork, Blue Fork -->
+            <path class="river river-main" d="M 640,1200 C 600,1180 570,1160 520,1140" />
+            <!-- Red Fork to Riverrun -->
+            <path class="river river-sub" d="M 520,1140 C 480,1140 450,1145 410,1145" />
+            <!-- Green Fork past Twins to Neck -->
+            <path class="river river-sub" d="M 520,1140 C 510,1090 495,1030 480,970 C 470,940 485,920 490,890" />
+            <!-- Blue Fork -->
+            <path class="river river-tributary" d="M 520,1140 C 490,1110 460,1090 440,1070" />
+
+            <!-- River Mander (Through Highgarden) -->
+            <path class="river river-main" d="M 230,1470 C 290,1460 360,1465 425,1455 C 500,1440 560,1410 600,1380" />
+            <path class="river river-sub" d="M 425,1455 C 430,1490 450,1530 470,1560" />
+
+            <!-- Blackwater Rush (to King's Landing & Blackwater Bay) -->
+            <path class="river river-main" d="M 440,1290 C 490,1300 530,1310 590,1310" />
+
+            <!-- White Knife River (White Harbor) -->
+            <path class="river river-sub" d="M 590,780 C 585,740 570,700 550,670 C 530,645 490,630 470,625" />
+
+            <!-- Essos Major Rivers: The Mighty Rhoyne -->
+            <path class="river river-main" style="stroke-width: 4.5;" d="
+              M 1360,780 
+              C 1370,890 1390,1020 1410,1150 
+              C 1425,1260 1440,1370 1460,1480 
+              C 1465,1510 1475,1530 1485,1560" />
+            <!-- Upper Rhoyne & Noyne Tributary -->
+            <path class="river river-sub" d="M 1240,840 C 1300,880 1350,910 1390,940" />
+            <!-- Sarne River -->
+            <path class="river river-sub" d="M 1520,950 C 1600,900 1710,870 1810,830" />
+          </g>
+
+          <!-- ==========================================================
+               THE WALL (DEFENSIVE ICE BARRIER)
+               ========================================================== -->
+          <g id="layer-wall">
+            <!-- Shadow effect and main ice block -->
+            <line class="the-wall" x1="335" y1="432" x2="655" y2="432" />
+            <line class="the-wall-ice" x1="335" y1="431" x2="655" y2="431" />
+            <!-- Castles along the Wall -->
+            <rect x="355" y="427" width="5" height="7" fill="#1b2832" stroke="#fff" stroke-width="0.5" /> <!-- Shadow Tower -->
+            <rect x="500" y="426" width="7" height="9" fill="#1b2832" stroke="#fff" stroke-width="0.8" /> <!-- Castle Black -->
+            <rect x="635" y="427" width="5" height="7" fill="#1b2832" stroke="#fff" stroke-width="0.5" /> <!-- Eastwatch -->
+            <text x="495" y="422" font-family="Cinzel" font-size="11" font-weight="700" fill="#2d4251" letter-spacing="2" text-anchor="middle">THE WALL</text>
+          </g>
+
+          <!-- ==========================================================
+               TOPOGRAPHICAL DETAILS (MOUNTAINS & FORESTS)
+               ========================================================== -->
+          <g id="layer-mountains">
+            <!-- Mountains of the Moon (The Vale) -->
+            <use href="#mountain-symbol" x="650" y="1040" />
+            <use href="#mountain-symbol" x="675" y="1030" />
+            <use href="#mountain-symbol" x="700" y="1050" />
+            <use href="#mountain-symbol" x="660" y="1080" />
+            <use href="#mountain-symbol" x="690" y="1090" />
+            <use href="#mountain-symbol" x="720" y="1070" />
+
+            <!-- Red Mountains of Dorne -->
+            <use href="#mountain-symbol" x="390" y="1620" />
+            <use href="#mountain-symbol" x="420" y="1610" />
+            <use href="#mountain-symbol" x="455" y="1630" />
+            <use href="#mountain-symbol" x="495" y="1620" />
+            <use href="#mountain-symbol" x="535" y="1635" />
+            <use href="#mountain-symbol" x="580" y="1620" />
+
+            <!-- Westerlands Hills & Gold Mines -->
+            <use href="#mountain-symbol" x="310" y="1190" />
+            <use href="#mountain-symbol" x="335" y="1180" />
+            <use href="#mountain-symbol" x="365" y="1210" />
+            <use href="#mountain-symbol" x="340" y="1240" />
+
+            <!-- Frostfangs (Beyond the Wall) -->
+            <use href="#mountain-snow" x="290" y="270" />
+            <use href="#mountain-snow" x="315" y="250" />
+            <use href="#mountain-snow" x="340" y="280" />
+            <use href="#mountain-snow" x="305" y="320" />
+            <use href="#mountain-snow" x="335" y="340" />
+
+            <!-- Essos: Painted Mountains (West of Slaver's Bay) -->
+            <use href="#mountain-symbol" x="1680" y="1320" />
+            <use href="#mountain-symbol" x="1710" y="1300" />
+            <use href="#mountain-symbol" x="1735" y="1330" />
+            <use href="#mountain-symbol" x="1760" y="1310" />
+
+            <!-- Essos: Mother of Mountains (Vaes Dothrak) -->
+            <use href="#mountain-symbol" x="2190" y="780" />
+            <use href="#mountain-symbol" x="2220" y="770" />
+
+            <!-- Essos: Bone Mountains (Far East) -->
+            <use href="#mountain-symbol" x="2520" y="780" />
+            <use href="#mountain-symbol" x="2540" y="830" />
+            <use href="#mountain-symbol" x="2530" y="890" />
+            <use href="#mountain-symbol" x="2550" y="950" />
+            <use href="#mountain-symbol" x="2540" y="1020" />
+            <use href="#mountain-symbol" x="2560" y="1100" />
+
+            <!-- Essos: Mountains of the Mourn (Shadow Lands & Asshai) -->
+            <use href="#mountain-symbol" x="2880" y="1520" />
+            <use href="#mountain-symbol" x="2910" y="1490" />
+            <use href="#mountain-symbol" x="2940" y="1530" />
+            <use href="#mountain-symbol" x="2970" y="1500" />
+            <use href="#mountain-symbol" x="3010" y="1530" />
+          </g>
+
+          <g id="layer-forests">
+            <!-- Haunted Forest (North of Wall) -->
+            <use href="#pine-symbol" x="430" y="360" />
+            <use href="#pine-symbol" x="450" y="350" />
+            <use href="#pine-symbol" x="480" y="370" />
+            <use href="#pine-symbol" x="520" y="350" />
+            <use href="#pine-symbol" x="550" y="365" />
+            <use href="#pine-symbol" x="580" y="380" />
+
+            <!-- Wolfswood (North of Winterfell) -->
+            <use href="#pine-symbol" x="350" y="580" />
+            <use href="#pine-symbol" x="375" y="560" />
+            <use href="#pine-symbol" x="410" y="575" />
+            <use href="#pine-symbol" x="385" y="605" />
+
+            <!-- Kingswood (South of King's Landing) -->
+            <use href="#tree-symbol" x="610" y="1340" />
+            <use href="#tree-symbol" x="635" y="1350" />
+            <use href="#tree-symbol" x="655" y="1370" />
+            <use href="#tree-symbol" x="625" y="1380" />
+
+            <!-- Rainwood (Stormlands / Cape Wrath) -->
+            <use href="#tree-symbol" x="660" y="1500" />
+            <use href="#tree-symbol" x="685" y="1490" />
+            <use href="#tree-symbol" x="710" y="1515" />
+            <use href="#tree-symbol" x="680" y="1530" />
+
+            <!-- Forest of Qohor (Essos) -->
+            <use href="#tree-symbol" x="1560" y="920" />
+            <use href="#tree-symbol" x="1590" y="910" />
+            <use href="#tree-symbol" x="1620" y="935" />
+            <use href="#tree-symbol" x="1580" y="960" />
+          </g>
+
+          <!-- ==========================================================
+               HISTORICAL ROADS & HIGHWAYS
+               ========================================================== -->
+          <g id="layer-roads">
+            <!-- The Great Kingsroad: Castle Black to Storm's End -->
+            <path class="trade-road kingsroad" d="
+              M 505,435 
+              L 475,620 
+              L 495,890 
+              L 470,980 
+              L 540,1140 
+              L 590,1300 
+              L 680,1440" />
+
+            <!-- Ocean Road & Goldroad -->
+            <path class="trade-road" d="M 345,1245 L 430,1220 L 520,1230 L 590,1300" /> <!-- Goldroad -->
+            <path class="trade-road" d="M 345,1245 L 320,1380 L 420,1460 L 335,1600" /> <!-- Ocean Road & Roseroad branch -->
+
+            <!-- Valyrian Demon Road (Essos) -->
+            <path class="trade-road" style="stroke:#8b4030;" d="M 1480,1540 L 1660,1500 L 1820,1460 L 2020,1380" />
+          </g>
+
+          <!-- ==========================================================
+               HISTORICAL LABELS & TITLES
+               ========================================================== -->
+          <g id="layer-labels">
+            <!-- Seas & Oceans -->
+            <text class="sea-label" x="140" y="900" transform="rotate(-70 140,900)">THE SUNSET SEA</text>
+            <text class="sea-label" x="910" y="1050" transform="rotate(75 910,1050)">THE NARROW SEA</text>
+            <text class="sea-label" x="880" y="490">THE SHIVERING SEA</text>
+            <text class="sea-label" x="1100" y="1850">THE SUMMER SEA</text>
+            <text class="sea-label" x="2700" y="1720">THE JADE SEA</text>
+            <text class="sea-label" x="2020" y="1590">SLAVER'S BAY</text>
+            <text class="sea-label" x="1750" y="1670" style="fill:#5c1a1a;">THE SMOKING SEA</text>
+
+            <!-- Major Continental Territories -->
+            <text class="region-label" x="480" y="730" font-size="22">THE NORTH</text>
+            <text class="region-label" x="470" y="1110" font-size="14">THE RIVERLANDS</text>
+            <text class="region-label" x="730" y="1030" font-size="14">THE VALE</text>
+            <text class="region-label" x="320" y="1300" font-size="14">WESTERLANDS</text>
+            <text class="region-label" x="430" y="1510" font-size="16">THE REACH</text>
+            <text class="region-label" x="690" y="1470" font-size="14">STORMLANDS</text>
+            <text class="region-label" x="590" y="1720" font-size="19">DORNE</text>
+            <text class="region-label" x="470" y="240" font-size="16">LANDS OF ALWAYS WINTER</text>
+            <text class="region-label" x="2100" y="860" font-size="24" style="letter-spacing:10px;">THE DOTHRAKI SEA</text>
+            <text class="region-label" x="2350" y="1420" font-size="16" style="fill:#8f4a30;">THE RED WASTE</text>
+            <text class="region-label" x="3000" y="1550" font-size="17" style="fill:#2d2424;">SHADOW LANDS</text>
+          </g>
+
+          <!-- ==========================================================
+               TRAVEL ROUTE DASHED ANIMATION LAYER
+               ========================================================== -->
+          <g id="layer-travel-route"></g>
+
+          <!-- ==========================================================
+               INTERACTIVE SETTLEMENT & CASTLE MARKERS
+               ========================================================== -->
+          <g id="layer-markers"></g>
+
+        </g>
+      </svg>
+
+      <!-- Maester's Brass Compass Rose (Bottom Left) -->
+      <div class="compass-container">
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#8c6e3d" stroke-width="1.5" stroke-dasharray="2, 4" />
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#4a3720" stroke-width="1" />
+          <!-- Cardinal Points -->
+          <polygon points="50,4 55,42 50,47 45,42" fill="#8b1e14" stroke="#33100b" stroke-width="0.8" />
+          <polygon points="50,96 55,58 50,53 45,58" fill="#c69b3e" stroke="#33100b" stroke-width="0.8" />
+          <polygon points="4,50 42,45 47,50 42,55" fill="#c69b3e" stroke="#33100b" stroke-width="0.8" />
+          <polygon points="96,50 58,45 53,50 58,55" fill="#c69b3e" stroke="#33100b" stroke-width="0.8" />
+          <!-- Half points -->
+          <polygon points="17,17 45,45 42,48 48,42" fill="#baa77a" />
+          <polygon points="83,17 55,45 52,42 58,48" fill="#baa77a" />
+          <polygon points="17,83 45,55 48,58 42,52" fill="#baa77a" />
+          <polygon points="83,83 55,55 58,52 52,58" fill="#baa77a" />
+          <!-- Center boss -->
+          <circle cx="50" cy="50" r="6" fill="#201309" stroke="#e5b95a" stroke-width="1.5" />
+          <!-- North Label -->
+          <text x="50" y="15" font-family="Cinzel" font-size="10" font-weight="900" fill="#edd9a6" text-anchor="middle">N</text>
+        </svg>
+      </div>
+
+      <!-- HUD Zoom & Reset Controls -->
+      <div class="hud-controls">
+        <button id="btn-zoom-in" class="btn-hud" title="Zoom Closer in Leagues">+</button>
+        <button id="btn-zoom-out" class="btn-hud" title="Zoom Out to Full Realm">&minus;</button>
+        <button id="btn-zoom-reset" class="btn-hud" title="Reset Realm Perspective">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Side Information Drawer (The Parchment Scroll) -->
+      <aside id="info-panel">
+        <div class="panel-header">
+          <div class="drawer-drag-pill" id="panel-drag-pill"></div>
+          <button id="btn-close-panel" class="panel-close-btn" title="Close Scroll">&times;</button>
+          <span id="panel-region" class="panel-region-tag">The North</span>
+          <h2 id="panel-title" class="panel-title">Winterfell</h2>
+        </div>
+        <div class="panel-body">
+          <div id="panel-house-card" class="house-badge-card">
+            <div id="panel-house-sigil" class="house-badge-sigil">
+              <!-- Rendered dynamically -->
+            </div>
+            <div class="house-badge-details">
+              <span id="panel-house-name" class="house-badge-name">House Stark</span>
+              <span id="panel-house-words" class="house-badge-words">"Winter is Coming"</span>
+            </div>
+          </div>
+
+          <div class="panel-section-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+            Archmaester's Chronicle
+          </div>
+          <p id="panel-lore" class="panel-lore">Ancient stronghold of the Kings of Winter...</p>
+
+          <div class="panel-section-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            Cartographic Dossier
+          </div>
+          <div class="panel-stats-grid">
+            <div class="stat-pill">
+              <span class="stat-label">Classification</span>
+              <span id="panel-stat-type" class="stat-value">Ancestral Castle</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-label">Ruling Seat</span>
+              <span id="panel-stat-ruler" class="stat-value">Warden of the North</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-label">Strategic Landmark</span>
+              <span id="panel-stat-feature" class="stat-value">Hot Springs & Godswood</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-label">Military Garrison</span>
+              <span id="panel-stat-garrison" class="stat-value">High / Stone Walls</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel-actions">
+          <button id="btn-set-travel-start" class="panel-btn">Depart Here</button>
+          <button id="btn-set-travel-end" class="panel-btn">Destination</button>
+        </div>
+      </aside>
+
+    </main>
+
+    <!-- Bottom Status Bar -->
+    <footer id="bottom-bar">
+      <div class="scale-bar-wrapper">
+        <span>Map Scale:</span>
+        <div class="scale-ruler"></div>
+        <span>300 Leagues</span>
+      </div>
+      <div id="coord-readout" class="coord-display">Westerosi Grid: 470° W, 620° N</div>
+      <div>Citadel Archives &bull; 298 AC</div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation Bar (Visible on mobile screens <= 768px) -->
+    <nav id="mobile-bottom-nav" class="mobile-bottom-nav">
+      <button class="mobile-nav-btn" id="mob-btn-regions" title="Realms & Regions">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        <span>Realms</span>
+      </button>
+      <button class="mobile-nav-btn" id="mob-btn-search" title="Search Strongholds">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span>Search</span>
+      </button>
+      <button class="mobile-nav-btn" id="mob-btn-houses" title="Noble Houses">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+        <span>Houses</span>
+      </button>
+      <button class="mobile-nav-btn" id="mob-btn-travel" title="Travel Routes">
+        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7z"/></svg>
+        <span>Route</span>
+      </button>
+      <button class="mobile-nav-btn" id="mob-btn-sound" title="Citadel Ambiance">
+        <svg id="mob-audio-icon-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+        <svg id="mob-audio-icon-on" style="display:none;" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <span>Sound</span>
+      </button>
+    </nav>
+
+    <!-- MODAL: Great Noble Houses of the Realm -->
+    <div id="modal-houses" class="modal-backdrop">
+      <div class="modal-box">
         <div class="modal-header">
-          <div class="modal-sigil" id="modalSigil">🐺</div>
-          <h2 class="modal-title" id="modalHouseName">House Stark</h2>
-          <p class="modal-words" id="modalWords">"Winter is Coming"</p>
+          <h2 class="modal-title">Great Noble Houses of the Realm</h2>
+          <button class="panel-close-btn modal-close-btn">&times;</button>
         </div>
         <div class="modal-body">
-          <div class="modal-section">
-            <h3>📜 History</h3>
-            <p id="modalHistory"></p>
-          </div>
-          <div class="modal-section">
-            <h3>🏰 Seat & Region</h3>
-            <p id="modalSeat"></p>
-          </div>
-          <div class="modal-section">
-            <h3>⚔ Main Characters</h3>
-            <div class="characters-grid" id="modalCharacters"></div>
+          <div id="houses-grid-container" class="houses-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Travel Distance & Marching Calculator -->
+    <div id="modal-travel" class="modal-backdrop">
+      <div class="modal-box" style="max-width: 600px;">
+        <div class="modal-header">
+          <h2 class="modal-title">Maester's Travel & Route Calculator</h2>
+          <button class="panel-close-btn modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="travel-form">
+            <div class="travel-inputs-row">
+              <div class="travel-select-group">
+                <label class="travel-label">Point of Departure</label>
+                <select id="travel-select-origin" class="travel-select"></select>
+              </div>
+              <button id="btn-travel-swap" class="travel-swap-btn" title="Swap Origin and Destination">&#8644;</button>
+              <div class="travel-select-group">
+                <label class="travel-label">Destination Stronghold</label>
+                <select id="travel-select-dest" class="travel-select"></select>
+              </div>
+            </div>
+
+            <div class="travel-results-card">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <span class="travel-label">Straight-Line Route Distance</span>
+                <span id="travel-dist-val" style="font-family:var(--font-heading); font-size:1.3rem; font-weight:800; color:#872017;">-- Leagues</span>
+              </div>
+              <div class="travel-times-grid">
+                <div class="travel-speed-box">
+                  <div class="speed-icon">&#128038;</div>
+                  <span class="speed-method">Citadel Raven</span>
+                  <span id="time-raven" class="speed-duration">-- Days</span>
+                </div>
+                <div class="travel-speed-box">
+                  <div class="speed-icon">&#128014;</div>
+                  <span class="speed-method">Fast Courser</span>
+                  <span id="time-horse" class="speed-duration">-- Days</span>
+                </div>
+                <div class="travel-speed-box">
+                  <div class="speed-icon">&#9876;</div>
+                  <span class="speed-method">Armed Host</span>
+                  <span id="time-army" class="speed-duration">-- Days</span>
+                </div>
+                <div class="travel-speed-box">
+                  <div class="speed-icon">&#9973;</div>
+                  <span class="speed-method">War Galley</span>
+                  <span id="time-ship" class="speed-duration">-- Days</span>
+                </div>
+              </div>
+            </div>
+
+            <button id="btn-draw-travel-route" class="btn-medieval" style="justify-content:center; padding:10px; font-size:0.85rem;">
+              Plot & Trace Route on Realm Map
+            </button>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 
-  <script src="script.js"></script>
+  <!-- ==========================================================================
+       JAVASCRIPT ARCHITECTURE & CARTOGRAPHIC ENGINE
+       ========================================================================== -->
+  <script>
+    /**
+     * CARTOGRAPHIC DATA STORE:
+     * Contains accurately located canonical settlements, Great Houses, and regional geography
+     */
+    const HOUSES_DATA = {
+      stark: {
+        id: 'stark',
+        name: 'House Stark',
+        words: 'Winter is Coming',
+        seat: 'Winterfell',
+        region: 'The North',
+        sigilColor: '#707880',
+        sigilSvg: `<svg viewBox="0 0 100 100"><path d="M20,65 L35,50 L35,38 L45,28 L50,15 L58,25 L75,30 L85,45 L70,55 L75,70 L60,65 L50,85 L42,70 L30,75 Z" fill="#c0c8cf" stroke="#252a30" stroke-width="4"/><circle cx="58" cy="35" r="3" fill="#8c1c1c"/></svg>`,
+        description: 'Descendants of the First Men and the Kings of Winter who ruled the North for eight millennia before Torrhen Stark knelt to Aegon the Conqueror.',
+        relic: 'Ice (Ancestral Valyrian Greatsword)'
+      },
+      lannister: {
+        id: 'lannister',
+        name: 'House Lannister',
+        words: 'Hear Me Roar!',
+        seat: 'Casterly Rock',
+        region: 'The Westerlands',
+        sigilColor: '#d4af37',
+        sigilSvg: `<svg viewBox="0 0 100 100"><path d="M30,80 C20,70 25,45 35,35 C42,28 55,20 65,25 C75,30 80,45 75,60 C85,62 88,72 80,80 C70,72 65,75 58,72 C50,82 38,84 30,80 Z" fill="#ffd700" stroke="#801010" stroke-width="3"/><path d="M45,45 L55,42 L52,50 Z" fill="#801010"/></svg>`,
+        description: 'The wealthiest family in Westeros thanks to the bountiful gold mines of Casterly Rock and the Golden Tooth. Former Kings of the Rock.',
+        relic: 'Brightroar (Lost Valyrian Steel Blade)'
+      },
+      targaryen: {
+        id: 'targaryen',
+        name: 'House Targaryen',
+        words: 'Fire and Blood',
+        seat: 'Dragonstone / Red Keep',
+        region: 'The Crownlands',
+        sigilColor: '#800000',
+        sigilSvg: `<svg viewBox="0 0 100 100"><path d="M50,15 L60,30 L75,20 L70,40 L90,45 L72,58 L85,75 L65,70 L50,90 L40,70 L20,75 L30,55 L15,45 L32,38 L25,20 L40,30 Z" fill="#b31414" stroke="#000" stroke-width="2"/><circle cx="50" cy="45" r="5" fill="#ffd700"/></svg>`,
+        description: 'Of the blood of Old Valyria, the dragonlords who united the Seven Kingdoms with fire and steel under King Aegon I.',
+        relic: 'Blackfyre & Dark Sister (Valyrian Blades)'
+      },
+      baratheon: {
+        id: 'baratheon',
+        name: 'House Baratheon',
+        words: 'Ours is the Fury',
+        seat: "Storm's End",
+        region: 'The Stormlands',
+        sigilColor: '#e5b95a',
+        sigilSvg: `<svg viewBox="0 0 100 100"><path d="M50,45 C40,35 30,20 18,22 C18,30 25,38 35,42 L30,65 L45,82 L55,82 L70,65 L65,42 C75,38 82,30 82,22 C70,20 60,35 50,45 Z" fill="#1f1810" stroke="#e5b95a" stroke-width="3"/><path d="M42,32 L50,22 L58,32 L50,28 Z" fill="#e5b95a"/></svg>`,
+        description: 'Founded by Orys Baratheon, rumoured half-brother of Aegon the Conqueror, who slew Argilac the Arrogant and took the seat and words of House Durrandon.',
+        relic: "Robert's War Hammer"
+      },
+      greyjoy: {
+        id: 'greyjoy',
+        name: 'House Greyjoy',
+        words: 'We Do Not Sow',
+        seat: 'Pyke',
+        region: 'The Iron Islands',
+        sigilColor: '#1a1f26',
+        sigilSvg: `<svg viewBox="0 0 100 100"><path d="M50,20 C40,20 35,32 35,45 C35,60 25,70 15,75 C25,78 35,72 40,62 C45,72 42,85 30,90 C42,88 48,80 50,70 C52,80 58,88 70,90 C58,85 55,72 60,62 C65,72 75,78 85,75 C75,70 65,60 65,45 C65,32 60,20 50,20 Z" fill="#e5b95a" stroke="#000" stroke-width="2"/></svg>`,
+        description: 'Rulers of the Ironborn from the castle of Pyke who claim descent from the Grey King of the Age of Heroes. Worshippers of the Drowned God.',
+        relic: 'Red Rain & Nightfall'
+      },
+      tyrell: {
+        id: 'tyrell',
+        name: 'House Tyrell',
+        words: 'Growing Strong',
+        seat: 'Highgarden',
+        region: 'The Reach',
+        sigilColor: '#2b6336',
+        sigilSvg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#2d6e35"/><circle cx="50" cy="50" r="20" fill="#ffd700"/><circle cx="50" cy="50" r="10" fill="#e0a300"/><path d="M50,15 L50,85 M15,50 L85,50" stroke="#25552b" stroke-width="3"/></svg>`,
+        description: 'Former hereditary stewards of Highgarden elevated to Lords Paramount of the Mander after House Gardener perished on the Field of Fire.',
+        relic: 'Chivalric Grand Armies of the Reach'
+      },
+      martell: {
+        id: 'martell',
+        name: 'House Martell',
+        words: 'Unbowed, Unbent, Unbroken',
+        seat: 'Sunspear',
+        region: 'Dorne',
+        sigilColor: '#bf391b',
+        sigilSvg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="28" fill="#d9381e" stroke="#7a1805" stroke-width="2"/><line x1="20" y1="80" x2="80" y2="20" stroke="#e6b800" stroke-width="6"/><polygon points="85,15 72,20 80,28" fill="#e6b800"/></svg>`,
+        description: 'Princes of Dorne whose union with the warrior Queen Nymeria of the Rhoyne forged a distinct culture that resisted even Targaryen dragons.',
+        relic: "Spears of Nymeria"
+      },
+      arryn: {
+        id: 'arryn',
+        name: 'House Arryn',
+        words: 'As High as Honor',
+        seat: 'The Eyrie',
+        region: 'The Vale of Arryn',
+        sigilColor: '#25508a',
+        sigilSvg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="#295b9a"/><path d="M25,55 C40,40 60,35 78,50 C68,48 55,50 48,60 C42,50 35,52 25,55 Z" fill="#ffffff"/><path d="M60,30 C55,25 58,20 65,22 C60,25 62,28 60,30 Z" fill="#ffffff"/></svg>`,
+        description: 'Pure Andal nobility reigning from the mountain peaks of the Vale. The Eyrie is renowned throughout Westeros as an impregnable aerie.',
+        relic: 'The Falcon Crown'
+      },
+      tully: {
+        id: 'tully',
+        name: 'House Tully',
+        words: 'Family, Duty, Honor',
+        seat: 'Riverrun',
+        region: 'The Riverlands',
+        sigilColor: '#2a5b82',
+        sigilSvg: `<svg viewBox="0 0 100 100"><path d="M20,60 C30,35 60,35 80,50 C65,58 45,55 35,68 Z" fill="#b0c4de" stroke="#1d3d57" stroke-width="2"/><polygon points="80,50 92,42 90,58" fill="#b0c4de"/></svg>`,
+        description: 'Lords of Riverrun who led the rebellion of river lords against the ironborn King Harren the Black and were named Lords Paramount of the Trident.',
+        relic: 'River gates & Red Fork defenses'
+      },
+      bolton: {
+        id: 'bolton',
+        name: 'House Bolton',
+        words: 'Our Blades Are Sharp',
+        seat: 'The Dreadfort',
+        region: 'The North',
+        sigilColor: '#6e1515',
+        sigilSvg: `<svg viewBox="0 0 100 100"><line x1="25" y1="25" x2="75" y2="75" stroke="#a32020" stroke-width="8"/><line x1="75" y1="25" x2="25" y2="75" stroke="#a32020" stroke-width="8"/><circle cx="50" cy="50" r="12" fill="#e8dcb9" stroke="#7a1818" stroke-width="2"/></svg>`,
+        description: 'Ancient rivals of the Starks from the First Men era, infamous for their practice of flaying their enemies and wearing their skins as cloaks.',
+        relic: 'The Flaying Daggers'
+      }
+    };
+
+    const LOCATIONS_DATA = [
+      // WESTEROS - THE NORTH
+      {
+        id: 'winterfell',
+        name: 'Winterfell',
+        category: 'castle',
+        region: 'The North',
+        house: 'stark',
+        x: 470,
+        y: 620,
+        typeLabel: 'Ancestral Castle & Northern Capital',
+        ruler: 'Lord Eddard Stark / Warden of the North',
+        feature: 'Ancient Godswood with Heart Tree & Natural Hot Springs',
+        garrison: 'Extremely Strong double granite curtain walls',
+        description: 'Ancient seat of House Stark for thousands of years. Built by Brandon the Builder with the aid of giants, resting upon natural geothermal hot springs that keep the castle warm during harsh northern winters.'
+      },
+      {
+        id: 'castle-black',
+        name: 'Castle Black',
+        category: 'castle',
+        region: 'Beyond the Wall',
+        house: 'stark',
+        x: 505,
+        y: 435,
+        typeLabel: "Stronghold of the Night's Watch",
+        ruler: 'Lord Commander Jeor Mormont',
+        feature: 'The Wall, 700 feet of weeping solid ice',
+        garrison: 'Brothers of the Sworn Brotherhood',
+        description: "The primary headquarters and garrison of the Night's Watch, situated midway along the base of the massive Wall. It possesses no walls of its own facing the south, for the Watch takes no part in the wars of men."
+      },
+      {
+        id: 'white-harbor',
+        name: 'White Harbor',
+        category: 'city',
+        region: 'The North',
+        house: 'stark',
+        x: 590,
+        y: 780,
+        typeLabel: 'Major Port City & Trade Hub',
+        ruler: 'Lord Wyman Manderly',
+        feature: 'New Castle & The Seal Rock harbor defenses',
+        garrison: 'Port Fleet and heavy northern infantry',
+        description: 'The sole true city of the North, situated at the mouth of the White Knife river. Seat of House Manderly, offering vital maritime trade with the Free Cities and King’s Landing.'
+      },
+      {
+        id: 'dreadfort',
+        name: 'The Dreadfort',
+        category: 'castle',
+        region: 'The North',
+        house: 'bolton',
+        x: 680,
+        y: 580,
+        typeLabel: 'Grim Fortress of House Bolton',
+        ruler: 'Lord Roose Bolton',
+        feature: 'Volcanic vents and deep subterranean dungeons',
+        garrison: 'Dreadfort Spearmen & Flayers',
+        description: 'Dark, sinister fortress on the banks of the Weeping Water. Said to house secret dungeon rooms where the Boltons historically kept the flayed skins of their enemies.'
+      },
+      {
+        id: 'the-twins',
+        name: 'The Twins',
+        category: 'castle',
+        region: 'The Riverlands',
+        house: 'tully',
+        x: 470,
+        y: 980,
+        typeLabel: 'Fortified Bridge & Toll Keep',
+        ruler: 'Lord Walder Frey',
+        feature: 'Water Tower commanding the Green Fork crossing',
+        garrison: '4,000 Frey levies',
+        description: 'Two identical stone keeps flanking the Green Fork of the Trident, joined by a fortified stone bridge. Controls the essential northern crossing between the Riverlands and the North.'
+      },
+
+      // THE VALE & RIVERLANDS
+      {
+        id: 'the-eyrie',
+        name: 'The Eyrie',
+        category: 'castle',
+        region: 'The Vale of Arryn',
+        house: 'arryn',
+        x: 690,
+        y: 1080,
+        typeLabel: 'Mountain Citadel & High Seat',
+        ruler: 'Lord Robin Arryn / Lady Lysa',
+        feature: 'The Moon Door & Sky Cells carved into sheer abyss',
+        garrison: 'Impregnable through the Bloody Gate and mountain waycastles',
+        description: 'Ancestral seat of House Arryn, perched thousands of feet above the Vale on the shoulder of the Giant’s Lance. Regarded as utterly impregnable to conventional ground assault.'
+      },
+      {
+        id: 'riverrun',
+        name: 'Riverrun',
+        category: 'castle',
+        region: 'The Riverlands',
+        house: 'tully',
+        x: 410,
+        y: 1145,
+        typeLabel: 'Three-Sided Island Fortress',
+        ruler: 'Lord Hoster Tully / Ser Edmure Tully',
+        feature: 'Water sluice gates turning the castle into an island',
+        garrison: 'Riverland bowmen and knights',
+        description: 'The triangular castle seat of House Tully situated at the confluence of the Red Fork and the Tumblestone rivers. When threatened, sluice gates can be opened to flood the moat on all three sides.'
+      },
+      {
+        id: 'harrenhal',
+        name: 'Harrenhal',
+        category: 'ruin',
+        region: 'The Riverlands',
+        house: 'tully',
+        x: 560,
+        y: 1180,
+        typeLabel: 'Vast Cursed Ruin of Black Harren',
+        ruler: 'Disputed / Crown Appointees',
+        feature: 'Five melted towers by Balerion the Black Dread',
+        garrison: 'Nominal garrison / Mercenary free companies',
+        description: 'The largest castle ever built in Westeros, constructed by King Harren the Black to demonstrate his boundless arrogance. Melted into blackened stone by Aegon the Conqueror and his dragon Balerion.'
+      },
+      {
+        id: 'gulltown',
+        name: 'Gulltown',
+        category: 'city',
+        region: 'The Vale of Arryn',
+        house: 'arryn',
+        x: 780,
+        y: 1120,
+        typeLabel: 'Major Port City & Naval Stronghold',
+        ruler: 'House Grafton',
+        feature: 'Sheltered deepwater harbor on the Bay of Crabs',
+        garrison: 'War galleys and merchant levies',
+        description: 'The chief port of the Vale of Arryn, providing a crucial trade channel across the Narrow Sea to Braavos and Pentos.'
+      },
+
+      // WESTERLANDS & IRON ISLANDS
+      {
+        id: 'casterly-rock',
+        name: 'Casterly Rock',
+        category: 'castle',
+        region: 'The Westerlands',
+        house: 'lannister',
+        x: 320,
+        y: 1220,
+        typeLabel: 'Colossal Sea-Carved Fortress',
+        ruler: 'Lord Tywin Lannister',
+        feature: 'Exhaustless subterranean gold mines and sea caverns',
+        garrison: 'Elite Lannister red cloaks and household knights',
+        description: 'An immense two-mile-long stone headland honeycombed with halls, galleries, and gold veins carved right into the living rock above the Sunset Sea. Seat of House Lannister.'
+      },
+      {
+        id: 'pyke',
+        name: 'Pyke',
+        category: 'castle',
+        region: 'The Iron Islands',
+        house: 'greyjoy',
+        x: 230,
+        y: 1090,
+        typeLabel: 'Sea-Spire Stronghold of the Ironborn',
+        ruler: 'Lord Balon Greyjoy',
+        feature: 'Rope bridges swaying over churning sea surges',
+        garrison: 'Ironborn Reavers and Iron Fleet captains',
+        description: 'Ancient seat of House Greyjoy built upon three rocky sea stacks and a headland eroded away by the raging waves of Ironman’s Bay, connected solely by precarious rope and wood suspension bridges.'
+      },
+
+      // CROWNLANDS & REACH
+      {
+        id: 'kings-landing',
+        name: "King's Landing",
+        category: 'city',
+        region: 'The Crownlands',
+        house: 'baratheon',
+        x: 580,
+        y: 1300,
+        typeLabel: 'Royal Capital of the Seven Kingdoms',
+        ruler: 'King Robert I Baratheon / Iron Throne',
+        feature: 'The Red Keep, Great Sept of Baelor, and Dragonpit',
+        garrison: '2,000 City Watchmen (Gold Cloaks) and Kingsguard',
+        description: 'The sprawling capital of the Seven Kingdoms founded by Aegon I on the Blackwater. Home to half a million souls, the Red Keep, and the Iron Throne forged from thousands of surrender swords.'
+      },
+      {
+        id: 'dragonstone',
+        name: 'Dragonstone',
+        category: 'castle',
+        region: 'The Crownlands',
+        house: 'baratheon',
+        x: 735,
+        y: 1255,
+        typeLabel: 'Ancient Valyrian Island Citadel',
+        ruler: 'Lord Stannis Baratheon',
+        feature: 'Architecture shaped by Valyrian sorcery into dragons',
+        garrison: 'Narrow Sea naval squadron and loyal stormland knights',
+        description: 'Volcanic island fortress in the jaws of Blackwater Bay. Crafted by ancient Valyrian stone-singers using magic to liquefy and shape stone into fearsome gargoyles and dragonesque ramparts.'
+      },
+      {
+        id: 'highgarden',
+        name: 'Highgarden',
+        category: 'castle',
+        region: 'The Reach',
+        house: 'tyrell',
+        x: 425,
+        y: 1455,
+        typeLabel: 'Tiered Garden Palace of the Reach',
+        ruler: 'Lord Mace Tyrell / Lady Olenna Tyrell',
+        feature: 'Three concentric tiers of white walls with briar mazes',
+        garrison: 'The massive Knight chivalry of the Reach',
+        description: 'Seat of House Tyrell and former court of the Gardener Kings. Nestled on a broad verdant hill overlooking the gentle River Mander, famed for fountains, rose courtyards, and chivalric culture.'
+      },
+      {
+        id: 'oldtown',
+        name: 'Oldtown',
+        category: 'city',
+        region: 'The Reach',
+        house: 'tyrell',
+        x: 340,
+        y: 1600,
+        typeLabel: 'City of Wisdom, Maesters & Faith',
+        ruler: 'Lord Leyton Hightower',
+        feature: 'The Hightower Beacon and the Citadel of Archmaesters',
+        garrison: 'Hightower Watch and maritime harbor fleet',
+        description: 'The oldest city in Westeros, housing the grand Citadel where maesters forge their chains of knowledge, and the colossal Hightower beacon guiding ships into Whispering Sound.'
+      },
+
+      // STORMLANDS & DORNE
+      {
+        id: 'storms-end',
+        name: "Storm's End",
+        category: 'castle',
+        region: 'The Stormlands',
+        house: 'baratheon',
+        x: 680,
+        y: 1440,
+        typeLabel: 'Impregnable Coastal Bulwark',
+        ruler: 'Lord Renly Baratheon',
+        feature: 'Colossal 80-foot curved drum tower facing Shipbreaker Bay',
+        garrison: 'Stormland marchers and veterans',
+        description: 'Legendary fortress raised by Durran Godsgrief with the aid of the First Men and Bran the Builder. Its monolithic curved walls have resisted centuries of siege and the fury of oceanic storms.'
+      },
+      {
+        id: 'sunspear',
+        name: 'Sunspear',
+        category: 'castle',
+        region: 'Dorne',
+        house: 'martell',
+        x: 820,
+        y: 1720,
+        typeLabel: 'Ancient Palace of the Princes of Dorne',
+        ruler: 'Prince Doran Martell',
+        feature: 'The Spear Tower and Tower of the Sun with golden domes',
+        garrison: 'Dornish sand steed cavalry and spearmen',
+        description: 'The palace seat of House Martell, situated on the eastern tip of Dorne surrounded on three sides by the Summer Sea. Protected by the winding triple Winding Walls.'
+      },
+
+      // ESSOS - FREE CITIES & THE EAST
+      {
+        id: 'braavos',
+        name: 'Braavos',
+        category: 'city',
+        region: 'The Free Cities',
+        house: null,
+        x: 1150,
+        y: 680,
+        typeLabel: 'Secret City of a Hundred Islands',
+        ruler: 'The Sealord of Braavos',
+        feature: 'The Titan of Braavos, Iron Bank, and House of Black and White',
+        garrison: 'Great Arsenal War Fleet and Faceless Assassins',
+        description: 'The wealthiest and most powerful of the Free Cities, built across a hundred lagoon islands. Guarded by the monumental bronze Titan straddling its harbor entrance.'
+      },
+      {
+        id: 'pentos',
+        name: 'Pentos',
+        category: 'city',
+        region: 'The Free Cities',
+        house: null,
+        x: 1100,
+        y: 1020,
+        typeLabel: 'Major Commercial Free City',
+        ruler: 'The Prince of Pentos / Council of Magisters (Illyrio)',
+        feature: 'Towering brick walls, spice vaults, and merchant palaces',
+        garrison: 'Mercenary contract companies and city guards',
+        description: 'Large coastal mercantile metropolis on the Bay of Pentos. Known for its fabulously rich magisters who bribe Dothraki horselords with gifts to ensure peace.'
+      },
+      {
+        id: 'volantis',
+        name: 'Volantis',
+        category: 'city',
+        region: 'The Free Cities',
+        house: null,
+        x: 1480,
+        y: 1520,
+        typeLabel: 'Oldest Daughter of Valyria',
+        ruler: 'The Three Triarchs (Tigers & Elephants)',
+        feature: 'The Long Bridge across the Rhoyne and the Black Wall',
+        garrison: 'Tiger Cloak slave guards and vast war galleys',
+        description: 'The most populous and ancient of the Free Cities, sprawling at the delta of the Rhoyne. The old noble families of pure Valyrian descent reside behind the colossal 200-foot Black Wall.'
+      },
+      {
+        id: 'meereen',
+        name: 'Meereen',
+        category: 'city',
+        region: "Slaver's Bay",
+        house: 'targaryen',
+        x: 2020,
+        y: 1380,
+        typeLabel: "Greatest City of Slaver's Bay",
+        ruler: 'Queen Daenerys Targaryen / Great Masters',
+        feature: 'The Great Pyramid rising 800 feet with the Bronze Harpy',
+        garrison: 'Unsullied Phalanxes & Dragonriders',
+        description: 'Ancient Ghiscari city constructed of multicolored bricks on the banks of the Skahazadhan. Captured by Daenerys Targaryen who made the apex of the Great Pyramid her royal throne.'
+      },
+      {
+        id: 'vaes-dothrak',
+        name: 'Vaes Dothrak',
+        category: 'city',
+        region: 'The Dothraki Sea',
+        house: null,
+        x: 2150,
+        y: 800,
+        typeLabel: 'Sacred City of the Horselords',
+        ruler: 'The Dosh Khaleen (Crones)',
+        feature: 'Horse Gate, Mother of Mountains, Womb of the World lake',
+        garrison: 'All Khalasars in sacred brotherhood; blades forbidden',
+        description: 'The sole permanent city of the nomadic Dothraki people, nestled beneath the sacred Mother of Mountains. Shedding blood or drawing steel within its boundaries is punishable by death.'
+      },
+      {
+        id: 'qarth',
+        name: 'Qarth',
+        category: 'city',
+        region: 'Qarth & Jade Gates',
+        house: null,
+        x: 2420,
+        y: 1530,
+        typeLabel: 'Queen of Cities & Gateway of the Jade Gates',
+        ruler: 'The Pureborn & The Thirteen',
+        feature: 'Triple concentric decorated walls & House of the Undying',
+        garrison: 'Camel Cavalry and Jade Gates trade fleet',
+        description: 'Magnificent ancient city commanding the maritime straits between the Summer Sea and the Jade Sea. Famed for its immense wealth, spice trade, and the mysterious Warlocks.'
+      },
+      {
+        id: 'asshai',
+        name: 'Asshai-by-the-Shadow',
+        category: 'city',
+        region: 'Asshai & The Shadow',
+        house: null,
+        x: 2950,
+        y: 1650,
+        typeLabel: 'Mystic City of Sorcery and Black Stone',
+        ruler: 'Shadowbinders & Dark Sorcerers',
+        feature: 'Buildings of oily black stone that drinks the light',
+        garrison: 'Arcane blood magic and shadow spells',
+        description: 'A shadowy, eerie port city on the southern edge of the Shadow Lands. No children live in Asshai, and it is home to shadowbinders, necromancers, and practitioners of the forbidden dark arts.'
+      },
+      {
+        id: 'myr',
+        name: 'Myr',
+        category: 'city',
+        region: 'The Free Cities',
+        house: null,
+        x: 1160,
+        y: 1380,
+        typeLabel: 'Free City of Craftsmen & Artisans',
+        ruler: 'Council of Magisters',
+        feature: 'Myrish lenses, intricate lace, and crossbows',
+        garrison: 'Sellsword companies (Golden Company / Second Sons)',
+        description: 'A wealthy Free City on the Sea of Myrth renowned for fine tapestries, lace, green nectar wine, and exquisite master-crafted glass lenses and myrish eyes.'
+      },
+      {
+        id: 'tyrosh',
+        name: 'Tyrosh',
+        category: 'city',
+        region: 'The Free Cities',
+        house: null,
+        x: 990,
+        y: 1470,
+        typeLabel: 'Island Merchant Stronghold',
+        ruler: 'Archon of Tyrosh',
+        feature: 'Inner high fortress and bright vibrant garment dyes',
+        garrison: 'Mercenary fleets and sellswords',
+        description: 'An island city fortress close to the northern Stepstones. Famed for its flamboyant citizens who dye their beards bright colors and produce pear-brandy, armor, and slave collar ironwork.'
+      },
+      {
+        id: 'lys',
+        name: 'Lys',
+        category: 'city',
+        region: 'The Free Cities',
+        house: null,
+        x: 1100,
+        y: 1680,
+        typeLabel: 'The Lovely City of Pleasure',
+        ruler: 'Conclave of Magisters',
+        feature: 'Pleasure gardens, alchemical poisons (Tears of Lys)',
+        garrison: 'Sellsword galleys and privateer navies',
+        description: 'Spread across a cluster of sunny, fertile islands in the Summer Sea. Renowned for its blue-eyed, silver-blonde inhabitants retaining the pure blood of Old Valyria, pleasure houses, and subtle deadly poisons.'
+      },
+      {
+        id: 'astapor',
+        name: 'Astapor',
+        category: 'city',
+        region: "Slaver's Bay",
+        house: null,
+        x: 2010,
+        y: 1560,
+        typeLabel: 'The Red City of the Unsullied',
+        ruler: 'The Good Masters',
+        feature: 'Plaza of Pride & Bronze Harpy of Ghis',
+        garrison: 'Legions of Unsullied slave-soldiers',
+        description: 'The southernmost city on Slaver’s Bay, built of crumbling red bricks with terracotta dust in the wind. World-famed for training the emotionless, brutally disciplined Unsullied eunuch warriors.'
+      },
+      {
+        id: 'yunkai',
+        name: 'Yunkai',
+        category: 'city',
+        region: "Slaver's Bay",
+        house: null,
+        x: 2040,
+        y: 1460,
+        typeLabel: 'The Yellow City of Bed-Slaves',
+        ruler: 'The Wise Masters',
+        feature: 'Stepped pyramids of yellow crumbling brick',
+        garrison: 'Sellswords (Stormcrows & Second Sons)',
+        description: 'A city of yellow brick nestled midway along Slaver’s Bay between Meereen and Astapor. Famous for training luxury slaves, entertainers, and court dancers, ruled by the corrupt Wise Masters.'
+      },
+      {
+        id: 'hardhome',
+        name: 'Hardhome',
+        category: 'ruin',
+        region: 'Beyond the Wall',
+        house: null,
+        x: 640,
+        y: 330,
+        typeLabel: 'Cursed Free Folk Settlement',
+        ruler: 'Free Folk Chieftains',
+        feature: 'Screaming caves of Storrold’s Point and ship shelter',
+        garrison: 'Free Folk clans and spearwives',
+        description: 'Once the only true town beyond the Wall until a mysterious cataclysm engulfed it in unearthly fire and ash centuries ago. A refuge for thousands of wildlings fleeing the White Walkers.'
+      },
+      {
+        id: 'fist-first-men',
+        name: 'Fist of the First Men',
+        category: 'ruin',
+        region: 'Beyond the Wall',
+        house: null,
+        x: 350,
+        y: 310,
+        typeLabel: 'Ancient Ringfort of the First Men',
+        ruler: 'Ancient First Men (Ruined)',
+        feature: 'Ringwall of rough stone atop a sheer granite hill',
+        garrison: 'Scene of the great Night’s Watch last stand',
+        description: 'An ancient circular stone ringfort raised atop a steep, lone hill above the Milkwater river, surrounded by the Haunted Forest. Site of the catastrophic wight assault on the Great Ranging.'
+      }
+    ];
+
+    const REGIONS_DATA = {
+      'The North': {
+        name: 'The North',
+        ruler: 'House Stark (Winterfell)',
+        capital: 'Winterfell',
+        geography: 'Vast, cold boreal realm encompassing nearly half of Westeros, from the Neck to the Wall.',
+        climate: 'Harsh temperate to sub-arctic; heavy winter snowfalls.',
+        strength: 'Approx. 20,000–25,000 fierce warriors and battle-hardened infantry.',
+        centerX: 480, centerY: 680, zoom: 1.4
+      },
+      'Beyond the Wall': {
+        name: 'Beyond the Wall',
+        ruler: 'King-Beyond-the-Wall / Free Folk Clans',
+        capital: 'None (Thenn & Hardhome)',
+        geography: 'Untamed glacial wilderness, Haunted Forest, Frostfangs, and Lands of Always Winter.',
+        climate: 'Permanent sub-zero permafrost and lethal blizzards.',
+        strength: 'Over 100,000 wildlings, giants, and wights.',
+        centerX: 450, centerY: 300, zoom: 1.5
+      },
+      'The Riverlands': {
+        name: 'The Riverlands',
+        ruler: 'House Tully (Riverrun)',
+        capital: 'Riverrun',
+        geography: 'Fertile heartland crisscrossed by the three branches of the Trident and God’s Eye.',
+        climate: 'Temperate and lush with frequent rains and misty river valleys.',
+        strength: 'Approx. 20,000 river lords, archers, and knights.',
+        centerX: 520, centerY: 1140, zoom: 2.0
+      },
+      'The Vale of Arryn': {
+        name: 'The Vale of Arryn',
+        ruler: 'House Arryn (The Eyrie)',
+        capital: 'The Eyrie',
+        geography: 'Impenetrable mountain valleys ringed by the sheer peaks of the Mountains of the Moon.',
+        climate: 'Crisp alpine air, fertile valleys, and snowbound peaks.',
+        strength: 'Over 20,000 armored knights of the Vale.',
+        centerX: 730, centerY: 1100, zoom: 2.0
+      },
+      'The Westerlands': {
+        name: 'The Westerlands',
+        ruler: 'House Lannister (Casterly Rock)',
+        capital: 'Casterly Rock',
+        geography: 'Rugged hills and coastlines rich in gold, silver, and iron ores.',
+        climate: 'Mild maritime temperate with coastal sea winds.',
+        strength: '35,000 disciplined, well-equipped heavy cavalry and red cloaks.',
+        centerX: 330, centerY: 1240, zoom: 2.2
+      },
+      'The Iron Islands': {
+        name: 'The Iron Islands',
+        ruler: 'House Greyjoy (Pyke)',
+        capital: 'Pyke',
+        geography: 'Barren, storm-wracked archipelago off the western coast of Westeros.',
+        climate: 'Cold, damp, salt-laden storms and rocky cliffs.',
+        strength: 'Iron Fleet of hundreds of longships and 15,000 fierce reavers.',
+        centerX: 230, centerY: 1080, zoom: 2.6
+      },
+      'The Crownlands': {
+        name: 'The Crownlands',
+        ruler: 'House Baratheon of King’s Landing (Iron Throne)',
+        capital: "King's Landing",
+        geography: 'Blackwater Bay basin, fertile coastlands, and the volcanic island of Dragonstone.',
+        climate: 'Mild, warm temperate summer seasons.',
+        strength: 'Royal fleet, 2,000 Gold Cloaks, and loyal crown vassals.',
+        centerX: 640, centerY: 1290, zoom: 2.2
+      },
+      'The Reach': {
+        name: 'The Reach',
+        ruler: 'House Tyrell (Highgarden)',
+        capital: 'Highgarden',
+        geography: 'Vast agricultural heartland fed by the Mander, filled with orchards, vineyards, and wheatfields.',
+        climate: 'Warm, pleasant, sunny, and bountiful.',
+        strength: 'The largest army in Westeros: up to 80,000–100,000 mounted chivalric knights and foot soldiers.',
+        centerX: 400, centerY: 1490, zoom: 1.8
+      },
+      'The Stormlands': {
+        name: 'The Stormlands',
+        ruler: 'House Baratheon (Storm’s End)',
+        capital: "Storm's End",
+        geography: 'Rugged cliff-lined coastlines, stormy bays, the Rainwood, and the Dornish Marches.',
+        climate: 'Wild oceanic gale storms, relentless rain, and tempestuous seas.',
+        strength: 'Approx. 25,000 stubborn, weather-hardened shock troops and marchers.',
+        centerX: 680, centerY: 1460, zoom: 2.0
+      },
+      'Dorne': {
+        name: 'Dorne',
+        ruler: 'House Martell (Sunspear)',
+        capital: 'Sunspear',
+        geography: 'Arid desert sands, rugged red mountains, rocky passes, and coastal oasis waterways.',
+        climate: 'Searing desert heat and arid scrubland.',
+        strength: 'Approx. 25,000 guerrilla spearmen and swift sand steed riders.',
+        centerX: 580, centerY: 1710, zoom: 1.8
+      },
+      'The Free Cities': {
+        name: 'The Free Cities',
+        ruler: 'Nine Sovereign City-States (Braavos, Pentos, Volantis, Myr, Lys, Tyrosh, etc.)',
+        capital: 'Braavos / Volantis',
+        geography: 'Western coastal realm of Essos from the Narrow Sea eastward to the Rhoyne river basin.',
+        climate: 'Varied from misty northern lagoons to sunny Mediterranean southern archipelagos.',
+        strength: 'Massive mercenary companies, Iron Bank wealth, and war fleets.',
+        centerX: 1250, centerY: 1100, zoom: 1.3
+      },
+      "Slaver's Bay": {
+        name: "Slaver's Bay / Bay of Dragons",
+        ruler: 'Great Masters / Daenerys Targaryen',
+        capital: 'Meereen',
+        geography: 'Arid coastal gulf containing the ancient Ghiscari cities of Meereen, Yunkai, and Astapor.',
+        climate: 'Hot, dry, and dust-swept with baked clay and brick.',
+        strength: 'Unsullied legions, Ghiscari pit fighters, and sellsword companies.',
+        centerX: 2040, centerY: 1470, zoom: 1.7
+      },
+      'The Dothraki Sea': {
+        name: 'The Dothraki Sea',
+        ruler: 'Nomadic Khals & The Dosh Khaleen',
+        capital: 'Vaes Dothrak',
+        geography: 'Colossal ocean of undulating steppe grass stretching from the Forest of Qohor to the Bone Mountains.',
+        climate: 'Endless winds, sun-drenched rolling plains, and harsh seasonal droughts.',
+        strength: 'Over 100,000 mounted bowmen and fierce screaming cavalry.',
+        centerX: 2100, centerY: 850, zoom: 1.4
+      },
+      'Qarth & Jade Gates': {
+        name: 'Qarth & Jade Gates',
+        ruler: 'The Pureborn, Tourmaline Brotherhood, Spice Guild, and The Thirteen',
+        capital: 'Qarth',
+        geography: 'Chokepoint maritime gateway between the Summer Sea and the Jade Sea, edged by the Red Waste.',
+        climate: 'Searing desert heat cooled by ocean breezes.',
+        strength: 'Elite camel corps and supreme naval mercantile armada.',
+        centerX: 2450, centerY: 1540, zoom: 1.8
+      },
+      'Asshai & The Shadow': {
+        name: 'Asshai & The Shadow',
+        ruler: 'Shadowbinders & Sorcerers',
+        capital: 'Asshai-by-the-Shadow',
+        geography: 'Stygai ruins, River Ash with glowing venomous fish, and the dark Mountains of the Mourn.',
+        climate: 'Ominous, sunless gloomy mist where nothing natural grows.',
+        strength: 'Forbidden blood magic, necromancy, and ancient sorcery.',
+        centerX: 2950, centerY: 1550, zoom: 1.6
+      }
+    };
+
+    /**
+     * CARTOGRAPHIC ENGINE STATE & CAMERA
+     */
+    class MapEngine {
+      constructor() {
+        this.svg = document.getElementById('map-svg');
+        this.worldGroup = document.getElementById('map-world');
+        this.viewport = document.getElementById('map-viewport');
+        
+        // Base ViewBox dimensions (3200 x 2000)
+        this.baseWidth = 3200;
+        this.baseHeight = 2000;
+        
+        // Camera Transform State
+        this.scale = 1.0;
+        this.minScale = 0.7;
+        this.maxScale = 4.5;
+        this.panX = 0;
+        this.panY = 0;
+        
+        this.isPanning = false;
+        this.startX = 0;
+        this.startY = 0;
+        
+        // Active selections
+        this.selectedLocation = null;
+        this.activeFilter = 'all';
+        this.travelOrigin = null;
+        this.travelDest = null;
+        
+        // Canvas Atmosphere
+        this.fogCanvas = document.getElementById('fog-canvas');
+        this.fogCtx = this.fogCanvas.getContext('2d');
+        this.particles = [];
+
+        // Audio state
+        this.audioPlaying = false;
+        this.audioCtx = null;
+        this.audioNoiseNode = null;
+
+        this.init();
+      }
+
+      init() {
+        this.setupEventListeners();
+        this.renderMarkers();
+        this.populateSelects();
+        this.setupFogParticles();
+        this.centerInitialView();
+        this.animateFog();
+      }
+
+      /* ------------------------------------------------------------------------
+         COORDINATES & CAMERA TRANSFORM
+         ------------------------------------------------------------------------ */
+      centerInitialView() {
+        // Focus comfortably on Westeros and Western Essos
+        this.panX = -180;
+        this.panY = -120;
+        this.scale = 1.15;
+        this.applyTransform();
+      }
+
+      applyTransform(smooth = false) {
+        if (smooth) {
+          this.worldGroup.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1)';
+          setTimeout(() => {
+            this.worldGroup.style.transition = '';
+          }, 650);
+        }
+        this.worldGroup.setAttribute(
+          'transform',
+          `translate(${this.panX}, ${this.panY}) scale(${this.scale})`
+        );
+        this.updateScaleBar();
+      }
+
+      flyTo(targetX, targetY, targetScale = 2.2) {
+        const rect = this.viewport.getBoundingClientRect();
+        // Calculate viewport center in SVG coordinates
+        const vpCenterX = rect.width / 2;
+        const vpCenterY = rect.height / 2;
+
+        // Map scale ratios
+        const svgScaleX = rect.width / this.baseWidth;
+        const svgScaleY = rect.height / this.baseHeight;
+        const fitScale = Math.min(svgScaleX, svgScaleY);
+
+        this.scale = targetScale;
+        this.panX = (this.baseWidth / 2) - targetX * targetScale;
+        this.panY = (this.baseHeight / 2) - targetY * targetScale;
+
+        this.applyTransform(true);
+      }
+
+      updateScaleBar() {
+        // Calculate dynamic leagues per tick
+        const leagues = Math.round(300 / this.scale);
+        const rulerText = document.querySelector('.scale-bar-wrapper span:last-child');
+        if (rulerText) rulerText.textContent = `${leagues} Leagues`;
+      }
+
+      /* ------------------------------------------------------------------------
+         MARKER RENDERING & INTERACTION
+         ------------------------------------------------------------------------ */
+      renderMarkers() {
+        const markersGroup = document.getElementById('layer-markers');
+        markersGroup.innerHTML = '';
+
+        LOCATIONS_DATA.forEach(loc => {
+          const markerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          markerG.setAttribute('class', `location-marker marker-type-${loc.category}`);
+          markerG.setAttribute('data-id', loc.id);
+          markerG.setAttribute('transform', `translate(${loc.x}, ${loc.y})`);
+
+          let iconHref = '#icon-castle';
+          if (loc.category === 'city') iconHref = '#icon-city';
+          if (loc.category === 'ruin') iconHref = '#icon-ruin';
+
+          markerG.innerHTML = `
+            <circle class="marker-pin-outer" cx="0" cy="0" r="10" />
+            <use href="${iconHref}" x="0" y="0" />
+            <text class="location-title" x="0" y="20">${loc.name}</text>
+          `;
+
+          markerG.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.selectLocation(loc);
+          });
+
+          markersGroup.appendChild(markerG);
+        });
+      }
+
+      selectLocation(loc) {
+        this.selectedLocation = loc;
+
+        // Visual active state on markers
+        document.querySelectorAll('.location-marker').forEach(m => m.classList.remove('active'));
+        const activeMarker = document.querySelector(`.location-marker[data-id="${loc.id}"]`);
+        if (activeMarker) activeMarker.classList.add('active');
+
+        // Populate side panel
+        document.getElementById('panel-region').textContent = loc.region;
+        document.getElementById('panel-title').textContent = loc.name;
+        document.getElementById('panel-lore').textContent = loc.description;
+        document.getElementById('panel-stat-type').textContent = loc.typeLabel;
+        document.getElementById('panel-stat-ruler').textContent = loc.ruler;
+        document.getElementById('panel-stat-feature').textContent = loc.feature;
+        document.getElementById('panel-stat-garrison').textContent = loc.garrison;
+
+        const houseCard = document.getElementById('panel-house-card');
+        const houseSigil = document.getElementById('panel-house-sigil');
+        const houseName = document.getElementById('panel-house-name');
+        const houseWords = document.getElementById('panel-house-words');
+
+        if (loc.house && HOUSES_DATA[loc.house]) {
+          const h = HOUSES_DATA[loc.house];
+          houseCard.style.display = 'flex';
+          houseSigil.innerHTML = h.sigilSvg;
+          houseName.textContent = h.name;
+          houseWords.textContent = `"${h.words}"`;
+        } else {
+          houseCard.style.display = 'none';
+        }
+
+        // Open panel smoothly
+        document.getElementById('info-panel').classList.add('open');
+
+        // Center map smoothly on the clicked location
+        this.flyTo(loc.x, loc.y, Math.max(this.scale, 1.8));
+
+        // Update footer coordinates
+        document.getElementById('coord-readout').textContent = 
+          `Westerosi Grid: ${loc.x}° W, ${loc.y}° N (${loc.region})`;
+      }
+
+      /* ------------------------------------------------------------------------
+         REGION HIGHLIGHTING & FILTERING
+         ------------------------------------------------------------------------ */
+      highlightRegion(regionName) {
+        document.querySelectorAll('.region-layer').forEach(r => {
+          if (r.getAttribute('data-region') === regionName) {
+            r.classList.add('highlighted');
+          } else {
+            r.classList.remove('highlighted');
+          }
+        });
+
+        // Sync dropdown if exists
+        const regDropdown = document.getElementById('region-dropdown-select');
+        if (regDropdown && regDropdown.value !== regionName) {
+          regDropdown.value = regionName;
+        }
+
+        // If regional dossier exists, display in side panel and fly camera
+        if (REGIONS_DATA[regionName]) {
+          const rData = REGIONS_DATA[regionName];
+          this.flyTo(rData.centerX, rData.centerY, rData.zoom);
+
+          document.getElementById('panel-region').textContent = 'Realm Territory';
+          document.getElementById('panel-title').textContent = rData.name;
+          document.getElementById('panel-lore').textContent = rData.geography;
+          document.getElementById('panel-stat-type').textContent = 'Territorial Realm';
+          document.getElementById('panel-stat-ruler').textContent = rData.ruler;
+          document.getElementById('panel-stat-feature').textContent = rData.climate;
+          document.getElementById('panel-stat-garrison').textContent = rData.strength;
+
+          const houseCard = document.getElementById('panel-house-card');
+          houseCard.style.display = 'none';
+
+          document.getElementById('info-panel').classList.add('open');
+          document.getElementById('coord-readout').textContent = 
+            `Region Focus: ${rData.name} (Capital: ${rData.capital})`;
+        }
+      }
+
+      filterLocations(filterType) {
+        this.activeFilter = filterType;
+        document.querySelectorAll('.filter-chip').forEach(c => {
+          c.classList.toggle('active', c.getAttribute('data-filter') === filterType);
+        });
+
+        document.querySelectorAll('.location-marker').forEach(marker => {
+          const id = marker.getAttribute('data-id');
+          const loc = LOCATIONS_DATA.find(l => l.id === id);
+          if (!loc) return;
+
+          let visible = true;
+          if (filterType === 'westeros') {
+            visible = !['The Free Cities', "Slaver's Bay", 'The Dothraki Sea', 'Qarth & Jade Gates', 'Asshai & The Shadow'].includes(loc.region);
+          } else if (filterType === 'essos') {
+            visible = ['The Free Cities', "Slaver's Bay", 'The Dothraki Sea', 'Qarth & Jade Gates', 'Asshai & The Shadow'].includes(loc.region);
+          } else if (filterType === 'castles') {
+            visible = loc.category === 'castle';
+          } else if (filterType === 'cities') {
+            visible = loc.category === 'city';
+          }
+
+          marker.style.display = visible ? 'block' : 'none';
+        });
+      }
+
+      /* ------------------------------------------------------------------------
+         TRAVEL MODE & ROUTE CALCULATION
+         ------------------------------------------------------------------------ */
+      calculateTravelRoute(startLoc, endLoc) {
+        if (!startLoc || !endLoc) return;
+
+        // Euclidean map distance in Westerosi leagues
+        const dx = endLoc.x - startLoc.x;
+        const dy = endLoc.y - startLoc.y;
+        const dist = Math.round(Math.hypot(dx, dy));
+
+        document.getElementById('travel-dist-val').textContent = `${dist} Leagues`;
+
+        // Speeds:
+        // Raven: ~75 leagues/day
+        // Fast Courser horse: ~25 leagues/day
+        // Marching Host: ~12 leagues/day
+        // War Ship: ~35 leagues/day
+        document.getElementById('time-raven').textContent = `${Math.max(1, Math.round(dist / 75))} Days`;
+        document.getElementById('time-horse').textContent = `${Math.max(1, Math.round(dist / 25))} Days`;
+        document.getElementById('time-army').textContent = `${Math.max(2, Math.round(dist / 12))} Days`;
+        document.getElementById('time-ship').textContent = `${Math.max(1, Math.round(dist / 35))} Days`;
+
+        // Draw animated dotted path on SVG
+        const routeLayer = document.getElementById('layer-travel-route');
+        
+        // Generate curved quadratic Bezier line for natural antique aesthetic
+        const midX = (startLoc.x + endLoc.x) / 2 - (dy * 0.12);
+        const midY = (startLoc.y + endLoc.y) / 2 + (dx * 0.12);
+
+        const pathData = `M ${startLoc.x},${startLoc.y} Q ${midX},${midY} ${endLoc.x},${endLoc.y}`;
+
+        routeLayer.innerHTML = `
+          <path class="travel-route-shadow" d="${pathData}" />
+          <path class="travel-route-line" d="${pathData}" />
+          <circle cx="${startLoc.x}" cy="${startLoc.y}" r="8" fill="#ffd700" stroke="#801010" stroke-width="2" />
+          <circle cx="${endLoc.x}" cy="${endLoc.y}" r="8" fill="#ffd700" stroke="#801010" stroke-width="2" />
+        `;
+
+        // Zoom to encompass both locations
+        const centerPointX = (startLoc.x + endLoc.x) / 2;
+        const centerPointY = (startLoc.y + endLoc.y) / 2;
+        const fitZoom = Math.min(2.5, Math.max(0.9, 1400 / (dist + 300)));
+        this.flyTo(centerPointX, centerPointY, fitZoom);
+      }
+
+      /* ------------------------------------------------------------------------
+         ATMOSPHERIC CANVAS (FOG / MIST)
+         ------------------------------------------------------------------------ */
+      setupFogParticles() {
+        const resize = () => {
+          this.fogCanvas.width = this.viewport.clientWidth;
+          this.fogCanvas.height = this.viewport.clientHeight;
+        };
+        window.addEventListener('resize', resize);
+        resize();
+
+        this.particles = [];
+        for (let i = 0; i < 35; i++) {
+          this.particles.push({
+            x: Math.random() * this.fogCanvas.width,
+            y: Math.random() * this.fogCanvas.height,
+            radius: 80 + Math.random() * 120,
+            speedX: 0.2 + Math.random() * 0.35,
+            speedY: (Math.random() - 0.5) * 0.1,
+            alpha: 0.08 + Math.random() * 0.12
+          });
+        }
+      }
+
+      animateFog() {
+        const ctx = this.fogCtx;
+        const w = this.fogCanvas.width;
+        const h = this.fogCanvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        this.particles.forEach(p => {
+          p.x += p.speedX;
+          p.y += p.speedY;
+
+          if (p.x - p.radius > w) p.x = -p.radius;
+          if (p.y - p.radius > h) p.y = -p.radius;
+          if (p.y + p.radius < 0) p.y = h + p.radius;
+
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+          grad.addColorStop(0, `rgba(240, 230, 205, ${p.alpha})`);
+          grad.addColorStop(1, 'rgba(240, 230, 205, 0)');
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        requestAnimationFrame(() => this.animateFog());
+      }
+
+      /* ------------------------------------------------------------------------
+         CITADEL AMBIENT AUDIO (SYNTHESIZED WEB AUDIO API)
+         ------------------------------------------------------------------------ */
+      toggleAudio() {
+        if (!this.audioPlaying) {
+          try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = new AudioContext();
+
+            // White noise buffer for gentle mountain wind
+            const bufferSize = this.audioCtx.sampleRate * 2;
+            const noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+              output[i] = Math.random() * 2 - 1;
+            }
+
+            const whiteNoise = this.audioCtx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+
+            // Lowpass filter for deep muffled wind
+            const filter = this.audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(260, this.audioCtx.currentTime);
+
+            // Subtle gain
+            const gain = this.audioCtx.createGain();
+            gain.gain.setValueAtTime(0.04, this.audioCtx.currentTime);
+
+            whiteNoise.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.audioCtx.destination);
+
+            whiteNoise.start();
+            this.audioNoiseNode = whiteNoise;
+            this.audioPlaying = true;
+
+            document.getElementById('audio-icon-off').style.display = 'none';
+            document.getElementById('audio-icon-on').style.display = 'block';
+            const mobOff = document.getElementById('mob-audio-icon-off');
+            const mobOn = document.getElementById('mob-audio-icon-on');
+            if (mobOff) mobOff.style.display = 'none';
+            if (mobOn) mobOn.style.display = 'block';
+          } catch (e) {
+            console.error('Audio initialization error:', e);
+          }
+        } else {
+          if (this.audioCtx) {
+            this.audioCtx.close();
+          }
+          this.audioPlaying = false;
+          document.getElementById('audio-icon-off').style.display = 'block';
+          document.getElementById('audio-icon-on').style.display = 'none';
+          const mobOff = document.getElementById('mob-audio-icon-off');
+          const mobOn = document.getElementById('mob-audio-icon-on');
+          if (mobOff) mobOff.style.display = 'block';
+          if (mobOn) mobOn.style.display = 'none';
+        }
+      }
+
+      /* ------------------------------------------------------------------------
+         EVENT LISTENERS & CONTROLS
+         ------------------------------------------------------------------------ */
+      setupEventListeners() {
+        // Panning with Mouse
+        this.viewport.addEventListener('mousedown', (e) => {
+          if (e.target.closest('#info-panel') || e.target.closest('.hud-controls') || e.target.closest('.map-filter-bar')) return;
+          this.isPanning = true;
+          this.startX = e.clientX - this.panX;
+          this.startY = e.clientY - this.panY;
+          this.viewport.classList.add('panning');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!this.isPanning) return;
+          this.panX = e.clientX - this.startX;
+          this.panY = e.clientY - this.startY;
+          this.applyTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+          this.isPanning = false;
+          this.viewport.classList.remove('panning');
+        });
+
+        // Touch Panning & Pinch-to-Zoom
+        let touchStartDist = 0;
+        this.viewport.addEventListener('touchstart', (e) => {
+          if (e.target.closest('#info-panel') || e.target.closest('.hud-controls') || e.target.closest('.map-filter-bar') || e.target.closest('#mobile-bottom-nav')) return;
+          if (e.touches.length === 1) {
+            this.isPanning = true;
+            this.startX = e.touches[0].clientX - this.panX;
+            this.startY = e.touches[0].clientY - this.panY;
+          } else if (e.touches.length === 2) {
+            this.isPanning = false;
+            touchStartDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+          }
+        }, { passive: true });
+
+        this.viewport.addEventListener('touchmove', (e) => {
+          if (e.target.closest('#info-panel') || e.target.closest('.hud-controls') || e.target.closest('.map-filter-bar') || e.target.closest('#mobile-bottom-nav')) return;
+          if (this.isPanning && e.touches.length === 1) {
+            e.preventDefault();
+            this.panX = e.touches[0].clientX - this.startX;
+            this.panY = e.touches[0].clientY - this.startY;
+            this.applyTransform();
+          } else if (e.touches.length === 2) {
+            e.preventDefault();
+            const currentDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            const factor = currentDist / touchStartDist;
+            this.scale = Math.min(this.maxScale, Math.max(this.minScale, this.scale * factor));
+            touchStartDist = currentDist;
+            this.applyTransform();
+          }
+        }, { passive: false });
+
+        this.viewport.addEventListener('touchend', () => {
+          this.isPanning = false;
+        });
+
+        // Swipe-down detection on mobile info drawer to dismiss
+        let panelTouchStartY = 0;
+        const infoPanel = document.getElementById('info-panel');
+        const panelHeader = infoPanel.querySelector('.panel-header');
+        if (panelHeader) {
+          panelHeader.addEventListener('touchstart', (e) => {
+            panelTouchStartY = e.touches[0].clientY;
+          }, { passive: true });
+          panelHeader.addEventListener('touchmove', (e) => {
+            const deltaY = e.touches[0].clientY - panelTouchStartY;
+            if (deltaY > 50) {
+              infoPanel.classList.remove('open');
+              document.querySelectorAll('.location-marker').forEach(m => m.classList.remove('active'));
+            }
+          }, { passive: true });
+        }
+
+        // Mouse Wheel Zoom
+        this.viewport.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+          const newScale = Math.min(this.maxScale, Math.max(this.minScale, this.scale * zoomFactor));
+
+          // Center zoom at cursor position
+          const rect = this.viewport.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+
+          this.panX = mouseX - (mouseX - this.panX) * (newScale / this.scale);
+          this.panY = mouseY - (mouseY - this.panY) * (newScale / this.scale);
+          this.scale = newScale;
+
+          this.applyTransform();
+        }, { passive: false });
+
+        // HUD Zoom buttons
+        document.getElementById('btn-zoom-in').addEventListener('click', () => {
+          this.scale = Math.min(this.maxScale, this.scale * 1.3);
+          this.applyTransform(true);
+        });
+        document.getElementById('btn-zoom-out').addEventListener('click', () => {
+          this.scale = Math.max(this.minScale, this.scale * 0.75);
+          this.applyTransform(true);
+        });
+        document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+          this.centerInitialView();
+        });
+        document.getElementById('btn-brand-home').addEventListener('click', () => {
+          this.centerInitialView();
+        });
+
+        // Side Panel Close
+        document.getElementById('btn-close-panel').addEventListener('click', () => {
+          document.getElementById('info-panel').classList.remove('open');
+          document.querySelectorAll('.location-marker').forEach(m => m.classList.remove('active'));
+        });
+
+        // Travel Buttons in Panel
+        document.getElementById('btn-set-travel-start').addEventListener('click', () => {
+          if (!this.selectedLocation) return;
+          this.travelOrigin = this.selectedLocation;
+          document.getElementById('travel-select-origin').value = this.selectedLocation.id;
+          this.openModal('modal-travel');
+          if (this.travelDest) this.calculateTravelRoute(this.travelOrigin, this.travelDest);
+        });
+
+        document.getElementById('btn-set-travel-end').addEventListener('click', () => {
+          if (!this.selectedLocation) return;
+          this.travelDest = this.selectedLocation;
+          document.getElementById('travel-select-dest').value = this.selectedLocation.id;
+          this.openModal('modal-travel');
+          if (this.travelOrigin) this.calculateTravelRoute(this.travelOrigin, this.travelDest);
+        });
+
+        // Search Input & Suggestions
+        const searchInput = document.getElementById('map-search-input');
+        const searchDropdown = document.getElementById('search-dropdown');
+        const clearBtn = document.getElementById('search-clear-btn');
+
+        searchInput.addEventListener('input', (e) => {
+          const val = e.target.value.trim().toLowerCase();
+          clearBtn.style.display = val.length > 0 ? 'block' : 'none';
+
+          if (val.length < 1) {
+            searchDropdown.classList.remove('active');
+            return;
+          }
+
+          const matchedLocations = LOCATIONS_DATA.filter(l => 
+            l.name.toLowerCase().includes(val) || 
+            l.region.toLowerCase().includes(val) ||
+            (l.house && HOUSES_DATA[l.house] && HOUSES_DATA[l.house].name.toLowerCase().includes(val))
+          );
+
+          if (matchedLocations.length === 0) {
+            searchDropdown.innerHTML = `<div style="padding:10px; color:#9c8567; font-size:0.8rem; text-align:center;">No citadel records found</div>`;
+          } else {
+            searchDropdown.innerHTML = matchedLocations.map(l => `
+              <div class="search-item" data-id="${l.id}">
+                <div class="search-item-info">
+                  <span class="search-item-title">${l.name}</span>
+                  <span class="search-item-sub">${l.region}</span>
+                </div>
+                <span class="search-item-badge">${l.category}</span>
+              </div>
+            `).join('');
+
+            searchDropdown.querySelectorAll('.search-item').forEach(item => {
+              item.addEventListener('click', () => {
+                const id = item.getAttribute('data-id');
+                const loc = LOCATIONS_DATA.find(l => l.id === id);
+                if (loc) {
+                  this.selectLocation(loc);
+                  searchDropdown.classList.remove('active');
+                  searchInput.value = loc.name;
+                }
+              });
+            });
+          }
+
+          searchDropdown.classList.add('active');
+        });
+
+        clearBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          clearBtn.style.display = 'none';
+          searchDropdown.classList.remove('active');
+        });
+
+        // Filter chips
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            const filter = chip.getAttribute('data-filter');
+            this.filterLocations(filter);
+          });
+        });
+
+        // Region Hover / Click Events
+        document.querySelectorAll('.region-layer').forEach(layer => {
+          layer.addEventListener('click', () => {
+            const regName = layer.getAttribute('data-region');
+            this.highlightRegion(regName);
+          });
+        });
+
+        const regSelect = document.getElementById('region-dropdown-select');
+        if (regSelect) {
+          regSelect.addEventListener('change', (e) => {
+            const reg = e.target.value;
+            if (reg) {
+              this.highlightRegion(reg);
+            } else {
+              document.querySelectorAll('.region-layer').forEach(r => r.classList.remove('highlighted'));
+            }
+          });
+        }
+
+        // Audio Toggle
+        document.getElementById('btn-audio-toggle').addEventListener('click', () => {
+          this.toggleAudio();
+        });
+
+        // Modals management
+        document.getElementById('btn-open-houses').addEventListener('click', () => {
+          this.renderHousesModal();
+          this.openModal('modal-houses');
+        });
+
+        document.getElementById('btn-open-travel').addEventListener('click', () => {
+          this.openModal('modal-travel');
+          this.updateTravelModalFromSelects();
+        });
+
+        document.querySelectorAll('.modal-close-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+          });
+        });
+
+        document.querySelectorAll('.modal-backdrop').forEach(mb => {
+          mb.addEventListener('click', (e) => {
+            if (e.target === mb) mb.classList.remove('open');
+          });
+        });
+
+        // Travel Form Controls
+        document.getElementById('travel-select-origin').addEventListener('change', () => this.updateTravelModalFromSelects());
+        document.getElementById('travel-select-dest').addEventListener('change', () => this.updateTravelModalFromSelects());
+        
+        document.getElementById('btn-travel-swap').addEventListener('click', () => {
+          const s1 = document.getElementById('travel-select-origin');
+          const s2 = document.getElementById('travel-select-dest');
+          const temp = s1.value;
+          s1.value = s2.value;
+          s2.value = temp;
+          this.updateTravelModalFromSelects();
+        });
+
+        document.getElementById('btn-draw-travel-route').addEventListener('click', () => {
+          this.updateTravelModalFromSelects();
+          document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+        });
+
+        // Mobile Bottom Navigation Listeners
+        const mobBtnRegions = document.getElementById('mob-btn-regions');
+        if (mobBtnRegions) {
+          mobBtnRegions.addEventListener('click', () => {
+            const filterBar = document.querySelector('.map-filter-bar');
+            if (filterBar) {
+              filterBar.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            }
+            const regSel = document.getElementById('region-dropdown-select');
+            if (regSel) {
+              regSel.focus();
+            }
+          });
+        }
+
+        const mobBtnSearch = document.getElementById('mob-btn-search');
+        if (mobBtnSearch) {
+          mobBtnSearch.addEventListener('click', () => {
+            const sInput = document.getElementById('map-search-input');
+            if (sInput) {
+              sInput.focus();
+              sInput.scrollIntoView({ behavior: 'smooth' });
+            }
+          });
+        }
+
+        const mobBtnHouses = document.getElementById('mob-btn-houses');
+        if (mobBtnHouses) {
+          mobBtnHouses.addEventListener('click', () => {
+            this.renderHousesModal();
+            this.openModal('modal-houses');
+          });
+        }
+
+        const mobBtnTravel = document.getElementById('mob-btn-travel');
+        if (mobBtnTravel) {
+          mobBtnTravel.addEventListener('click', () => {
+            this.openModal('modal-travel');
+            this.updateTravelModalFromSelects();
+          });
+        }
+
+        const mobBtnSound = document.getElementById('mob-btn-sound');
+        if (mobBtnSound) {
+          mobBtnSound.addEventListener('click', () => {
+            this.toggleAudio();
+          });
+        }
+      }
+
+      /* ------------------------------------------------------------------------
+         MODAL & FORM POPULATION
+         ------------------------------------------------------------------------ */
+      populateSelects() {
+        const originSelect = document.getElementById('travel-select-origin');
+        const destSelect = document.getElementById('travel-select-dest');
+
+        originSelect.innerHTML = '';
+        destSelect.innerHTML = '';
+
+        LOCATIONS_DATA.forEach((l, idx) => {
+          const opt1 = new Option(`${l.name} (${l.region})`, l.id);
+          const opt2 = new Option(`${l.name} (${l.region})`, l.id);
+          originSelect.add(opt1);
+          destSelect.add(opt2);
+        });
+
+        // Default: Winterfell to King's Landing
+        originSelect.value = 'winterfell';
+        destSelect.value = 'kings-landing';
+      }
+
+      updateTravelModalFromSelects() {
+        const oId = document.getElementById('travel-select-origin').value;
+        const dId = document.getElementById('travel-select-dest').value;
+
+        const startLoc = LOCATIONS_DATA.find(l => l.id === oId);
+        const endLoc = LOCATIONS_DATA.find(l => l.id === dId);
+
+        if (startLoc && endLoc) {
+          this.travelOrigin = startLoc;
+          this.travelDest = endLoc;
+          this.calculateTravelRoute(startLoc, endLoc);
+        }
+      }
+
+      renderHousesModal() {
+        const container = document.getElementById('houses-grid-container');
+        container.innerHTML = Object.values(HOUSES_DATA).map(h => `
+          <div class="house-card" data-house-id="${h.id}">
+            <div class="house-card-sigil">
+              ${h.sigilSvg}
+            </div>
+            <h3 class="house-card-name">${h.name}</h3>
+            <span class="house-card-words">"${h.words}"</span>
+            <span class="house-card-seat">Seat: <strong>${h.seat}</strong></span>
+          </div>
+        `).join('');
+
+        container.querySelectorAll('.house-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const hId = card.getAttribute('data-house-id');
+            const house = HOUSES_DATA[hId];
+            const targetLoc = LOCATIONS_DATA.find(l => l.house === hId);
+            
+            document.getElementById('modal-houses').classList.remove('open');
+            if (targetLoc) {
+              this.selectLocation(targetLoc);
+            }
+          });
+        });
+      }
+
+      openModal(modalId) {
+        document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+        document.getElementById(modalId).classList.add('open');
+      }
+    }
+
+    // Launch Application Once DOM is ready
+    window.addEventListener('DOMContentLoaded', () => {
+      window.cartographer = new MapEngine();
+    });
+  </script>
 </body>
 </html>
