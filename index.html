@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>GOT_Map</title>
+  <title>Game Of Thrones - MAP</title>
   
   <!-- Medieval Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3385,36 +3385,11 @@
       toggleAudio() {
         if (!this.audioPlaying) {
           try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.audioCtx = new AudioContext();
-
-            // White noise buffer for gentle mountain wind
-            const bufferSize = this.audioCtx.sampleRate * 2;
-            const noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
-            const output = noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-              output[i] = Math.random() * 2 - 1;
-            }
-
-            const whiteNoise = this.audioCtx.createBufferSource();
-            whiteNoise.buffer = noiseBuffer;
-            whiteNoise.loop = true;
-
-            // Lowpass filter for deep muffled wind
-            const filter = this.audioCtx.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.setValueAtTime(260, this.audioCtx.currentTime);
-
-            // Subtle gain
-            const gain = this.audioCtx.createGain();
-            gain.gain.setValueAtTime(0.04, this.audioCtx.currentTime);
-
-            whiteNoise.connect(filter);
-            filter.connect(gain);
-            gain.connect(this.audioCtx.destination);
-
-            whiteNoise.start();
-            this.audioNoiseNode = whiteNoise;
+            // Play theme.mp3 from the same directory as index.html
+            this.audioElement = new Audio('theme.mp3');
+            this.audioElement.loop = true;
+            this.audioElement.volume = 0.3; // Adjust 0.0–1.0 to taste
+            this.audioElement.play();
             this.audioPlaying = true;
 
             document.getElementById('audio-icon-off').style.display = 'none';
@@ -3427,8 +3402,9 @@
             console.error('Audio initialization error:', e);
           }
         } else {
-          if (this.audioCtx) {
-            this.audioCtx.close();
+          if (this.audioElement) {
+            this.audioElement.pause();
+            this.audioElement = null;
           }
           this.audioPlaying = false;
           document.getElementById('audio-icon-off').style.display = 'block';
